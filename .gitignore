@@ -1,0 +1,51 @@
+# Python / environments
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+
+# Secrets / local credentials
+.env
+.env.*
+*.key
+*serviceAccount*.json
+.cdsapirc
+
+# Large local raw data and downloaded archives
+*.nc
+*.nc4
+*.grib
+*.grb
+*.zarr/
+*.zip
+*.tar
+*.tar.gz
+*.tif
+*.tiff
+*.hdf
+*.h5
+
+# Local generated GIS extracts are reproducible; browser-ready simplified assets are allowed below
+/data/hydrobasins/hybas_sa_lev*/
+/data/hydrobasins/*.zip
+/data/hydrobasins/*.gpkg
+/data/hydrobasins/*.geojson
+!/results/trajectory_platform/assets/*.geojson
+
+# Large/generated trajectory tables: store canonical copies in GCS, not GitHub
+/results/tables/*.csv
+/results/tables/*.parquet
+!/results/tables/*summary.json
+
+# Keep static platform assets and metadata in git
+!/results/trajectory_platform/assets/*.csv
+!/results/trajectory_platform/assets/*.json
+!/results/trajectory_platform/assets/*.geojson
+
+# Logs and temporary files
+*.log
+*.tmp
+.cache/

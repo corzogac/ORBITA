@@ -1,0 +1,86 @@
+{
+  "source": "/Users/gac/research_projects/atmospheric_rivers_orinoquia/data/hydrobasins/hybas_sa_lev05_v1c/hybas_sa_lev05_v1c.shp",
+  "version": "HydroBASINS v1c",
+  "level": 5,
+  "bbox_orinoco": [
+    -75.0,
+    2.0,
+    -60.0,
+    10.0
+  ],
+  "n_basins": 76,
+  "n_main_bas_groups": 14,
+  "total_area_km2": 2290852.0000000005,
+  "main_bas_groups": [
+    {
+      "code": 6050004470,
+      "n_basins": 50,
+      "area_km2": 941417.0
+    },
+    {
+      "code": 6050007000,
+      "n_basins": 5,
+      "area_km2": 692504.8
+    },
+    {
+      "code": 6050000740,
+      "n_basins": 9,
+      "area_km2": 260734.6
+    },
+    {
+      "code": 6050004870,
+      "n_basins": 2,
+      "area_km2": 92051.0
+    },
+    {
+      "code": 6050000750,
+      "n_basins": 1,
+      "area_km2": 53087.0
+    },
+    {
+      "code": 6050001950,
+      "n_basins": 1,
+      "area_km2": 52530.4
+    },
+    {
+      "code": 6050004480,
+      "n_basins": 1,
+      "area_km2": 38300.7
+    },
+    {
+      "code": 6050003690,
+      "n_basins": 1,
+      "area_km2": 32719.1
+    },
+    {
+      "code": 6050001940,
+      "n_basins": 1,
+      "area_km2": 27553.5
+    },
+    {
+      "code": 6050003680,
+      "n_basins": 1,
+      "area_km2": 22318.1
+    },
+    {
+      "code": 6050004060,
+      "n_basins": 1,
+      "area_km2": 21624.8
+    },
+    {
+      "code": 6050003220,
+      "n_basins": 1,
+      "area_km2": 19353.5
+    },
+    {
+      "code": 6050004070,
+      "n_basins": 1,
+      "area_km2": 18935.5
+    },
+    {
+      "code": 6050003210,
+      "n_basins": 1,
+      "area_km2": 17722.0
+    }
+  ]
+}

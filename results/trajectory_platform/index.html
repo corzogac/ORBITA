@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ORBITA – Orinoquia–Andes Basin Integrated Trajectory Analysis</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    :root{--bg:#07111f;--panel:#0d1b2e;--muted:#99abc2;--text:#e7f0ff;--cyan:#67e8f9;--gold:#f9c74f;--green:#80ed99;--red:#ff6b6b;--blue:#93c5fd}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;}
+    header{padding:18px 22px;border-bottom:1px solid #1f3554;background:linear-gradient(135deg,#081425,#0c2138 70%,#12385a)}
+    h1{margin:0;font-size:24px}.subtitle{color:var(--muted);margin-top:6px;line-height:1.45;max-width:1260px}.badge{display:inline-block;border:1px solid #284669;border-radius:999px;padding:3px 9px;color:#b7d6ff;margin-right:6px;font-size:12px;background:#0b1a2b}
+    main{display:grid;grid-template-columns:390px 1fr;min-height:calc(100vh - 104px)} aside{padding:16px;border-right:1px solid #1f3554;background:#09182a;overflow:auto}.mapwrap{position:relative}#map{height:calc(100vh - 104px);background:#07111f}.card{background:var(--panel);border:1px solid #1f3554;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 12px 35px #0005}.card h2{font-size:16px;margin:0 0 10px}.note{font-size:13px;color:var(--muted);line-height:1.4}.metric{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric div{background:#071321;border:1px solid #1b304c;border-radius:10px;padding:9px}.metric b{display:block;font-size:20px}.metric span{font-size:12px;color:var(--muted)}select,input[type=range]{width:100%;accent-color:#67e8f9}.legend{position:absolute;right:14px;bottom:20px;z-index:700;background:#07111fde;border:1px solid #2c4d73;border-radius:12px;padding:11px;font-size:13px;color:#dcecff}.swatch{display:inline-block;width:26px;height:4px;border-radius:3px;margin-right:7px;vertical-align:middle}.leaflet-container{background:#07111f}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0d1b2e;color:#e7f0ff;border:1px solid #31577f}.tiny{font-size:12px;color:#8aa1bc}.warning{border-left:3px solid var(--gold);padding-left:10px;color:#ffd880}.ok{border-left:3px solid var(--green);padding-left:10px;color:#b9fbc0}.arrowIcon{color:#67e8f9;text-shadow:0 0 6px #001; font-size:18px; line-height:18px}.rawArrow{color:#c7f9ff;opacity:.45;font-size:13px}.basin-name{font-weight:800;color:#f9c74f;line-height:1.3}.sliderRow{margin:10px 0}.dual{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pill{display:inline-block;border-radius:8px;background:#071321;border:1px solid #1b304c;padding:4px 7px;margin:2px;color:#cfe4ff;font-size:12px}#contribChart,#agreementChart{height:235px}
+    .brand{display:flex;align-items:center;gap:16px}.logo{width:72px;height:72px;flex:0 0 auto;filter:drop-shadow(0 0 18px rgba(103,232,249,.35))}.brand-title{display:flex;flex-direction:column;gap:2px}.kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#80ed99;font-weight:800}.tagline{color:#d7e9ff;font-size:13px;margin-top:4px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.tabBtn{border:1px solid #284669;background:#081827;color:#cfe4ff;border-radius:999px;padding:9px 13px;font-weight:700;cursor:pointer}.tabBtn.active{background:linear-gradient(135deg,#67e8f9,#80ed99);color:#06111f;border-color:transparent}.tabPanel{display:none}.tabPanel.active{display:block}.tabPanel.active.mainGrid{display:grid}.tabPanel:not(.active){display:none!important}.mainGrid{display:grid;grid-template-columns:390px 1fr;min-height:calc(100vh - 154px)}.mainGrid #map{height:calc(100vh - 154px)}.report{padding:22px;max-width:1180px;margin:0 auto}.heroGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.feature{background:#071321;border:1px solid #1b304c;border-radius:16px;padding:16px}.feature h3{margin:0 0 8px;color:#dff8ff}.methodGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.method{background:#0b1b2d;border:1px solid #23415f;border-radius:16px;padding:16px}.method h3{margin:0 0 8px;color:#80ed99}.bigNumber{font-size:34px;font-weight:900;color:#67e8f9}.callout{background:linear-gradient(135deg,rgba(103,232,249,.11),rgba(128,237,153,.08));border:1px solid #2d6074;border-radius:18px;padding:18px;margin-bottom:18px}.flowLogoSmall{width:42px;vertical-align:middle;margin-right:10px}@media(max-width:900px){.mainGrid{grid-template-columns:1fr}.mainGrid #map{height:68vh}aside{border-right:0;border-bottom:1px solid #1f3554}.brand{align-items:flex-start}.logo{width:56px;height:56px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 120 120" aria-label="ORBITA logo">
+      <defs><linearGradient id="orbitaG" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#67e8f9"/><stop offset=".58" stop-color="#3b82f6"/><stop offset="1" stop-color="#80ed99"/></linearGradient></defs>
+      <circle cx="60" cy="60" r="47" fill="rgba(103,232,249,.08)" stroke="url(#orbitaG)" stroke-width="4" stroke-dasharray="178 44" stroke-linecap="round"/>
+      <path d="M94 31 L108 28 L101 41" fill="none" stroke="#80ed99" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M39 38 C50 28 73 33 82 49 C93 70 71 88 52 83 C35 79 27 61 35 47 Z" fill="rgba(128,237,153,.22)" stroke="#80ed99" stroke-width="2"/>
+      <path d="M18 72 C38 56 52 62 68 50 C82 40 93 42 104 35" fill="none" stroke="#e8f7ff" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+      <path d="M16 85 C38 70 54 76 75 63 C88 55 98 58 110 50" fill="none" stroke="#67e8f9" stroke-width="2" stroke-linecap="round" opacity=".6"/>
+      <circle cx="60" cy="60" r="5" fill="#f9c74f"/>
+    </svg>
+    <div class="brand-title">
+      <div class="kicker">ORBITA</div>
+      <h1>Orinoquia–Andes Basin Integrated Trajectory Analysis</h1>
+      <div class="tagline">Tracing the pathways of atmospheric water</div>
+      <div class="subtitle">
+        <span class="badge">HydroBASINS Level 6</span><span class="badge">basin-centered</span><span class="badge">backward + optional forward trajectories</span><span class="badge">moisture volume m³ + contribution %</span>
+        ORBITA explores where atmospheric water comes from and how flying-river pathways move before reaching a selected basin.
+      </div>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="ORBITA interface tabs">
+    <button class="tabBtn active" data-tab="mapExplorer">1. Map Explorer</button>
+    <button class="tabBtn" data-tab="timeAnalysis">2. Time Analysis</button>
+    <button class="tabBtn" data-tab="statisticsTab">3. Statistics</button>
+    <button class="tabBtn" data-tab="methodsTab">4. Methods</button>
+  </nav>
+</header>
+<main id="mapExplorer" class="tabPanel active mainGrid">
+  <aside>
+    <div class="card">
+      <h2>1. Select arrival basin and time window</h2>
+      <label class="tiny">Month</label>
+      <input id="monthSlider" type="range" min="0" max="0" value="0" />
+      <div id="monthLabel" class="note">Loading months…</div>
+      <div class="sliderRow">
+        <label class="tiny">Arrival day within selected month</label>
+        <input id="dateSlider" type="range" min="0" max="0" value="0" />
+        <div id="dateLabel" class="note">Loading dates…</div>
+      </div>
+      <div class="dual">
+        <div><label class="tiny">Previous days to include</label><input id="lookbackSlider" type="range" min="1" max="45" value="30" /><div id="lookbackLabel" class="note">30 days before</div></div>
+        <div><label class="tiny">Optional days after</label><input id="lookaheadSlider" type="range" min="0" max="15" value="0" /><div id="lookaheadLabel" class="note">0 days after</div></div>
+      </div>
+      <br/>
+      <label class="tiny">HydroBASINS L6 basin</label>
+      <select id="basinSelect"><option value="">Click or choose a basin</option></select>
+      <div id="selectedBasinName" class="basin-name" style="margin-top:10px">No basin selected</div>
+      <p class="note">Only trajectories whose <code>hour_back=0</code> arrival point is inside the selected basin are used. With the current prototype data, available arrival basins are those containing Bogotá and Manizales; the platform is now structured for all basin arrivals once production trajectories are generated.</p>
+    </div>
+    <div class="card">
+      <h2>2. Selected window summary</h2>
+      <div class="metric">
+        <div><b id="nTraj">–</b><span>arriving trajectories</span></div>
+        <div><b id="nPts">–</b><span>trajectory points</span></div>
+        <div><b id="meanDisp">–</b><span>mean dispersion</span></div>
+        <div><b id="absVol">–</b><span>avg transported volume</span></div>
+        <div><b id="relVol">–</b><span>relative contribution</span></div>
+        <div><b id="basinArea">–</b><span>selected basin area</span></div>
+      </div>
+      <p id="statusNote" class="note warning"></p>
+    </div>
+    <div class="card">
+      <h2>3. Agreement by travel time</h2>
+      <div id="agreementChart"></div>
+      <p class="note">Mean corridor thickness increases where many trajectories are close together. Direction is from high <code>hour_back</code> toward <code>0 h</code>, i.e. origin → selected arrival basin.</p>
+    </div>
+    <div class="card">
+      <h2>4. Neighbour/source contribution along path</h2>
+      <div id="contribChart"></div>
+      <p class="note">Physical m³ and % contribution will use <code>transport_volume_m3</code> / <code>uptake_volume_m3</code>. Until those columns exist, this remains a path-contact proxy.</p>
+    </div>
+  </aside>
+  <section class="mapwrap">
+    <div id="map"></div>
+    <div class="legend">
+      <div><span class="swatch" style="background:#bdefff;opacity:.45"></span>individual paths, origin → arrival</div>
+      <div><span class="swatch" style="background:#67e8f9;height:8px"></span>agreement-weighted mean path</div>
+      <div><span class="swatch" style="background:#f9c74f;height:8px"></span>selected L6 arrival basin</div>
+    </div>
+  </section>
+</main>
+<section id="timeAnalysis" class="tabPanel report">
+  <div class="callout"><h2>Time Analysis</h2><p class="note">Use this tab as the seasonal interpretation panel for ORBITA. The live controls remain in the Map Explorer; this page explains what each window means and how it will scale to monthly climatologies when the full ERA5 archive is processed.</p></div>
+  <div class="heroGrid">
+    <div class="feature"><div class="bigNumber">12</div><h3>Monthly navigation</h3><p class="note">The month slider supports month-by-month exploration of seasonal shifts in atmospheric pathways. Current prototype data contain January 2023; production assets will expose the full monthly sequence.</p></div>
+    <div class="feature"><div class="bigNumber">X</div><h3>User-defined day window</h3><p class="note">The previous-days slider controls the trajectory search length before arrival. The optional days-after slider is reserved for forward trajectories after arrival.</p></div>
+    <div class="feature"><div class="bigNumber">↔</div><h3>Backward and forward trajectories</h3><p class="note">Backward paths identify source regions. Forward paths, when available, will show where air masses move after crossing or arriving at the selected basin.</p></div>
+  </div>
+</section>
+<section id="statisticsTab" class="tabPanel report">
+  <div class="callout"><h2>Statistics</h2><p class="note">ORBITA separates physical transported-volume statistics from provisional path-contact proxies. This prevents the platform from overstating physical moisture contribution before the production moisture-volume engine is complete.</p></div>
+  <div class="heroGrid">
+    <div class="feature"><h3>Average transported moisture</h3><p class="note">Absolute volume will be reported in <b>m³</b> from <code>transport_volume_m3</code> or <code>uptake_volume_m3</code> fields once available.</p></div>
+    <div class="feature"><h3>Relative contribution</h3><p class="note">Contribution will be reported as <b>%</b>: source/neighbour basin moisture divided by total moisture over retained trajectories and the selected time window.</p></div>
+    <div class="feature"><h3>Agreement and uncertainty</h3><p class="note">Trajectory agreement is summarized by count and dispersion at each travel time. Thicker mean corridors indicate stronger path agreement.</p></div>
+  </div>
+</section>
+<section id="methodsTab" class="tabPanel report">
+  <div class="callout"><h2>Methods and Data</h2><p class="note">Scientific methods behind ORBITA – Orinoquia–Andes Basin Integrated Trajectory Analysis.</p></div>
+  <div class="methodGrid">
+    <div class="method"><h3>a) Basin definition</h3><p class="note">HydroBASINS Level 6 defines the basin interaction units. The platform displays HYBAS_ID, Pfafstetter code, basin area, and selected-basin attributes.</p></div>
+    <div class="method"><h3>b) Trajectory computation</h3><p class="note">The production design uses Lagrangian particle tracking with backward trajectories from basin arrival points or basin grids. The current prototype uses a 2D fixed-pressure RK4 ensemble; the target engine is full 3D RK4 over pressure levels.</p></div>
+    <div class="method"><h3>c) Atmospheric data</h3><p class="note">Meteorological forcing is ERA5 reanalysis over South America, including wind components, humidity, pressure-level diagnostics, and surface moisture variables.</p></div>
+    <div class="method"><h3>d) Moisture transport estimation</h3><p class="note">Moisture transported along trajectories will be computed from humidity and air-mass/volume diagnostics. Metrics include total volume in m³ and relative contribution in %.</p></div>
+    <div class="method"><h3>e) Temporal aggregation</h3><p class="note">Outputs are aggregated over user-defined windows and monthly climatologies. Event-based analysis can be added for specific wet-season or extreme events.</p></div>
+    <div class="method"><h3>f) Limitations</h3><p class="note">Uncertainty arises from ERA5 resolution, interpolation, trajectory-model sensitivity, vertical-motion assumptions, and the conversion from path contact to physical moisture contribution.</p></div>
+  </div>
+</section>
+<script>
+document.querySelectorAll('.tabBtn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tabPanel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.tab).classList.add('active');if(btn.dataset.tab==='mapExplorer'){setTimeout(()=>map.invalidateSize(),80)}}));
+const state={basins:null, trajectories:[], basinOptions:[], months:[], monthDates:[], selectedBasin:null, layers:{basins:null, raw:L.layerGroup(), mean:L.layerGroup(), arrows:L.layerGroup(), markers:L.layerGroup()}};
+const map=L.map('map',{preferCanvas:true}).setView([4.7,-74.5],7);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:12}).addTo(map);
+state.layers.raw.addTo(map);state.layers.mean.addTo(map);state.layers.arrows.addTo(map);state.layers.markers.addTo(map);
+function toNum(x){if(x===null||x===undefined)return null;if(typeof x==='string'&&(x.trim()===''||x.trim().toLowerCase()==='none'||x.trim().toLowerCase()==='nan'))return null;const v=Number(x);return Number.isFinite(v)?v:null}
+function basinId(x){const v=toNum(x);return v==null?null:String(Math.trunc(v))}
+function styleBasin(f){const id=String(f.properties.HYBAS_ID);const sel=id===state.selectedBasin;const arrival=state.basinOptions.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===id);return{color:sel?'#f9c74f':arrival?'#67e8f9':'#1d4e89',weight:sel?3:arrival?2:1,fillColor:sel?'#f9c74f':arrival?'#164e63':'#12385a',fillOpacity:sel?.32:arrival?.18:.055}}
+function selectedMonth(){return state.months[Number(document.getElementById('monthSlider').value)]}
+function selectedDate(){return state.monthDates[Number(document.getElementById('dateSlider').value)]}
+function dateWindow(){const d=new Date(selectedDate());const start=new Date(d);start.setDate(start.getDate()-Number(document.getElementById('lookbackSlider').value)+1);const end=new Date(d);end.setDate(end.getDate()+Number(document.getElementById('lookaheadSlider').value));return{start,end}}
+function setMonthDates(){const m=selectedMonth();state.monthDates=[...new Set(state.trajectories.filter(r=>r.month===m).map(r=>r.release_date))].sort();const ds=document.getElementById('dateSlider');ds.max=Math.max(0,state.monthDates.length-1);ds.value=state.monthDates.length-1;document.getElementById('monthLabel').textContent=m||'no month';}
+function windowRows(){if(!state.selectedBasin)return[];const {start,end}=dateWindow();let rows=state.trajectories.filter(r=>{const rd=new Date(r.release_date);return rd>=start&&rd<=end&&String(basinId(r.arrival_HYBAS_ID))===state.selectedBasin});return rows}
+function distKm(a,b){const R=6371,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180,la1=a.lat*Math.PI/180,la2=b.lat*Math.PI/180;const h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function bearing(a,b){const y=Math.sin((b.lon-a.lon)*Math.PI/180)*Math.cos(b.lat*Math.PI/180);const x=Math.cos(a.lat*Math.PI/180)*Math.sin(b.lat*Math.PI/180)-Math.sin(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.cos((b.lon-a.lon)*Math.PI/180);return (Math.atan2(y,x)*180/Math.PI+360)%360}
+function addArrow(a,b,raw=false){const mid=[(a.lat+b.lat)/2,(a.lon+b.lon)/2];const deg=bearing(a,b)-90;const html=`<div class="${raw?'rawArrow':'arrowIcon'}" style="transform:rotate(${deg}deg)">➤</div>`;L.marker(mid,{interactive:false,icon:L.divIcon({className:'',html,iconSize:[18,18],iconAnchor:[9,9]})}).addTo(state.layers.arrows)}
+function hasVolume(rows){return rows.some(r=>toNum(r.transport_volume_m3)!=null||toNum(r.uptake_volume_m3)!=null)}
+function rowVolume(r){return toNum(r.transport_volume_m3)??toNum(r.uptake_volume_m3)??0}
+function fmtM3(v){if(v==null||!Number.isFinite(v))return'pending';if(Math.abs(v)>=1e9)return(v/1e9).toFixed(2)+'B m³';if(Math.abs(v)>=1e6)return(v/1e6).toFixed(2)+'M m³';return v.toFixed(0)+' m³'}
+function draw(){state.layers.raw.clearLayers();state.layers.mean.clearLayers();state.layers.arrows.clearLayers();state.layers.markers.clearLayers();if(state.layers.basins)state.layers.basins.setStyle(styleBasin);document.getElementById('dateLabel').textContent=`${selectedDate()||'no date'} selected`;document.getElementById('lookbackLabel').textContent=document.getElementById('lookbackSlider').value+' days before';document.getElementById('lookaheadLabel').textContent=document.getElementById('lookaheadSlider').value+' days after';const rows=windowRows();const byTraj={};rows.forEach(r=>{if(!byTraj[r.trajectory_id])byTraj[r.trajectory_id]=[];byTraj[r.trajectory_id].push(r)});Object.values(byTraj).forEach(path=>{path.sort((a,b)=>Number(b.hour_back)-Number(a.hour_back));const coords=path.map(r=>[Number(r.lat),Number(r.lon)]).filter(c=>Number.isFinite(c[0])&&Number.isFinite(c[1]));if(coords.length>1){L.polyline(coords,{color:'#c7f9ff',weight:1,opacity:.14}).addTo(state.layers.raw);const mid=Math.floor((path.length-1)/2);if(path[mid+1])addArrow({lat:Number(path[mid].lat),lon:Number(path[mid].lon)},{lat:Number(path[mid+1].lat),lon:Number(path[mid+1].lon)},true)}});
+  const byHour={};rows.forEach(r=>{const h=Number(r.hour_back);if(!byHour[h])byHour[h]=[];byHour[h].push({lat:Number(r.lat),lon:Number(r.lon)})});const meanPts=[],agreement=[];Object.keys(byHour).map(Number).sort((a,b)=>b-a).forEach(h=>{const pts=byHour[h].filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));if(!pts.length)return;const mean={lat:pts.reduce((s,p)=>s+p.lat,0)/pts.length,lon:pts.reduce((s,p)=>s+p.lon,0)/pts.length};const disp=pts.length>1?pts.reduce((s,p)=>s+distKm(p,mean),0)/pts.length:0;const score=pts.length/(1+disp/25);meanPts.push({...mean,h,disp,n:pts.length,score});agreement.push({h,disp,n:pts.length,score})});for(let i=1;i<meanPts.length;i++){const p0=meanPts[i-1],p1=meanPts[i];const w=Math.max(2,Math.min(12,2+p1.score*2.3));L.polyline([[p0.lat,p0.lon],[p1.lat,p1.lon]],{color:'#67e8f9',weight:w,opacity:.94,lineCap:'round'}).bindTooltip(`${p0.h}→${p1.h} h back-to-arrival | n=${p1.n} | dispersion=${p1.disp.toFixed(1)} km`).addTo(state.layers.mean);addArrow(p0,p1,false)}if(meanPts.length){const origin=meanPts[0],arr=meanPts[meanPts.length-1];L.circleMarker([origin.lat,origin.lon],{radius:5,color:'#93c5fd',fillOpacity:.9}).bindTooltip('mean older/source position').addTo(state.layers.markers);L.circleMarker([arr.lat,arr.lon],{radius:6,color:'#80ed99',fillOpacity:.95}).bindTooltip('arrival basin position (0 h)').addTo(state.layers.markers)}updateStats(rows,Object.keys(byTraj).length,agreement);updateCharts(rows,agreement)}
+function updateStats(rows,ntraj,agreement){document.getElementById('nTraj').textContent=ntraj;document.getElementById('nPts').textContent=rows.length;const md=agreement.length?agreement.reduce((s,d)=>s+d.disp,0)/agreement.length:null;document.getElementById('meanDisp').textContent=md==null?'–':md.toFixed(1)+' km';const real=hasVolume(rows);const volumes=rows.filter(r=>Number(r.hour_back)===0).map(rowVolume).filter(v=>v>0);const avg=volumes.length?volumes.reduce((s,v)=>s+v,0)/volumes.length:null;document.getElementById('absVol').textContent=real?fmtM3(avg):'pending';document.getElementById('relVol').textContent=real?'100%':'proxy';const feat=state.basins?.features?.find(f=>String(f.properties.HYBAS_ID)===state.selectedBasin);document.getElementById('basinArea').textContent=feat&&feat.properties.SUB_AREA?Number(feat.properties.SUB_AREA).toFixed(0)+' km²':'–';const name=feat?(feat.properties.display_name||feat.properties.name):'No basin selected';document.getElementById('selectedBasinName').textContent=name;document.getElementById('statusNote').className='note '+(real?'ok':'warning');document.getElementById('statusNote').textContent=real?'Using physical transported-volume columns for m³ and relative contribution.':'Physical transported volume is not available yet in the prototype trajectories. The map/line agreement is valid for paths; contribution chart is still path-contact proxy until production rows include transport_volume_m3 or uptake_volume_m3.'}
+function updateCharts(rows,agreement){Plotly.react('agreementChart',[{x:agreement.map(d=>d.h),y:agreement.map(d=>d.disp),type:'scatter',mode:'lines+markers',line:{color:'#67e8f9'},marker:{color:'#f9c74f'},name:'dispersion km'}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:42,r:10,t:10,b:35},xaxis:{title:'hours backward',autorange:'reversed'},yaxis:{title:'km'}},{displayModeBar:false});const real=hasVolume(rows);const agg={};rows.forEach(r=>{const id=basinId(r.HYBAS_ID)||'ocean/unknown';agg[id]=(agg[id]||0)+(real?rowVolume(r):1)});const items=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,10);const total=items.reduce((s,d)=>s+d[1],0)||1;Plotly.react('contribChart',[{x:items.map(d=>100*d[1]/total),y:items.map(d=>d[0]==='ocean/unknown'?d[0]:'HB6_'+d[0]),type:'bar',orientation:'h',marker:{color:real?'#80ed99':'#93c5fd'}}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:112,r:10,t:10,b:35},xaxis:{title:real?'% transported volume':'% path contact proxy'},yaxis:{autorange:'reversed'}},{displayModeBar:false})}
+Promise.all([fetch('assets/orinoco_l6_basins_simplified.geojson').then(r=>r.json()),fetch('assets/trajectories_platform_current.csv').then(r=>r.text()).then(t=>Papa.parse(t,{header:true,dynamicTyping:false}).data.filter(r=>r.lat&&r.lon)),fetch('assets/arrival_basin_options.csv').then(r=>r.text()).then(t=>Papa.parse(t,{header:true,dynamicTyping:false}).data.filter(r=>r.arrival_HYBAS_ID))]).then(([basins,traj,opts])=>{state.basins=basins;state.trajectories=traj;state.basinOptions=opts;state.months=[...new Set(traj.map(r=>r.month||String(r.release_date).slice(0,7)))].sort();const ms=document.getElementById('monthSlider');ms.max=Math.max(0,state.months.length-1);ms.value=state.months.length-1;const bs=document.getElementById('basinSelect');basins.features.sort((a,b)=>String(a.properties.HYBAS_ID).localeCompare(String(b.properties.HYBAS_ID))).forEach(f=>{const o=document.createElement('option');o.value=String(f.properties.HYBAS_ID);const isArr=opts.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===o.value);o.textContent=(isArr?'★ ':'')+(f.properties.display_name||('HB6_'+o.value));bs.appendChild(o)});if(opts.length){state.selectedBasin=String(Math.trunc(Number(opts[0].arrival_HYBAS_ID)));bs.value=state.selectedBasin}setMonthDates();state.layers.basins=L.geoJSON(basins,{style:styleBasin,onEachFeature:(f,l)=>{l.on('click',()=>{state.selectedBasin=String(f.properties.HYBAS_ID);bs.value=state.selectedBasin;draw()});l.bindPopup(`<b>${f.properties.display_name||('HB6_'+f.properties.HYBAS_ID)}</b><br/>HydroBASINS Level 6<br/>Area: ${Number(f.properties.SUB_AREA||0).toFixed(0)} km²<br/><br/>Click to use as arrival basin.`)}}).addTo(map);map.fitBounds(state.layers.basins.getBounds(),{padding:[20,20]});ms.addEventListener('input',()=>{setMonthDates();draw()});document.getElementById('dateSlider').addEventListener('input',draw);document.getElementById('lookbackSlider').addEventListener('input',draw);document.getElementById('lookaheadSlider').addEventListener('input',draw);bs.addEventListener('change',e=>{state.selectedBasin=e.target.value||null;draw()});draw()});
+</script>
+</body>
+</html>

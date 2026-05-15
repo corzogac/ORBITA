@@ -1,0 +1,35 @@
+# Target locations for back-trajectory release
+# Each target defines a release point in 3D
+
+targets:
+  bogota:
+    name: "Bogotá"
+    lat: 4.7110
+    lon: -74.0721
+    elevation_m: 2640
+    description: "Capital city on eastern Andean cordillera"
+    release_pressure_levels: [1000, 850, 700, 500, 300]  # hPa
+    # Release in lower/mid troposphere to capture main moisture flux
+
+  manizales:
+    name: "Manizales"
+    lat: 5.0672
+    lon: -75.5174
+    elevation_m: 2150
+    description: "Central Andean cordillera coffee region"
+    release_pressure_levels: [1000, 850, 700, 500, 300]  # hPa
+
+# Trajectory parameters
+trajectory:
+  max_hours_backward: 240        # 10 days
+  integration_step_minutes: 60   # 1-hour sub-steps
+  integration_method: "rk4"      # 4th-order Runge-Kutta
+  release_frequency_hours: 6     # every 6 hours (00, 06, 12, 18 UTC)
+  
+# Domain bounds (checks that particles stay in domain)
+domain:
+  north: 15.0
+  south: -60.0
+  west: -85.0
+  east: -30.0
+  terminate_on_boundary: true

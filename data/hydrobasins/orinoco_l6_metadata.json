@@ -1,0 +1,201 @@
+{
+  "source": "/Users/gac/research_projects/atmospheric_rivers_orinoquia/data/hydrobasins/hybas_sa_lev06_v1c/hybas_sa_lev06_v1c.shp",
+  "version": "HydroBASINS v1c",
+  "level": 6,
+  "bbox": [
+    -76.5,
+    2.0,
+    -60.0,
+    10.0
+  ],
+  "n_basins": 201,
+  "n_main_bas_groups": 37,
+  "total_area_km2": 2078685.9000000001,
+  "main_bas_groups": [
+    {
+      "code": 6060004470,
+      "n_basins": 114,
+      "area_km2": 941417.0
+    },
+    {
+      "code": 6060007000,
+      "n_basins": 20,
+      "area_km2": 446520.4
+    },
+    {
+      "code": 6060000740,
+      "n_basins": 25,
+      "area_km2": 260734.6
+    },
+    {
+      "code": 6060004870,
+      "n_basins": 9,
+      "area_km2": 91932.5
+    },
+    {
+      "code": 6060000200,
+      "n_basins": 1,
+      "area_km2": 35995.5
+    },
+    {
+      "code": 6060001940,
+      "n_basins": 1,
+      "area_km2": 27553.5
+    },
+    {
+      "code": 6060033570,
+      "n_basins": 1,
+      "area_km2": 22325.0
+    },
+    {
+      "code": 6060003680,
+      "n_basins": 1,
+      "area_km2": 22318.1
+    },
+    {
+      "code": 6060004060,
+      "n_basins": 1,
+      "area_km2": 21624.8
+    },
+    {
+      "code": 6060003220,
+      "n_basins": 1,
+      "area_km2": 19353.5
+    },
+    {
+      "code": 6060004070,
+      "n_basins": 1,
+      "area_km2": 18935.5
+    },
+    {
+      "code": 6060003210,
+      "n_basins": 1,
+      "area_km2": 17722.0
+    },
+    {
+      "code": 6060002280,
+      "n_basins": 1,
+      "area_km2": 17128.1
+    },
+    {
+      "code": 6060034060,
+      "n_basins": 1,
+      "area_km2": 15397.6
+    },
+    {
+      "code": 6060000450,
+      "n_basins": 1,
+      "area_km2": 14065.1
+    },
+    {
+      "code": 6060004030,
+      "n_basins": 1,
+      "area_km2": 10319.8
+    },
+    {
+      "code": 6060001600,
+      "n_basins": 1,
+      "area_km2": 9987.2
+    },
+    {
+      "code": 6060001980,
+      "n_basins": 1,
+      "area_km2": 9875.8
+    },
+    {
+      "code": 6060004630,
+      "n_basins": 1,
+      "area_km2": 9400.0
+    },
+    {
+      "code": 6060004000,
+      "n_basins": 1,
+      "area_km2": 8506.0
+    },
+    {
+      "code": 6060004610,
+      "n_basins": 1,
+      "area_km2": 8247.1
+    },
+    {
+      "code": 6060001910,
+      "n_basins": 1,
+      "area_km2": 6966.0
+    },
+    {
+      "code": 6060004500,
+      "n_basins": 1,
+      "area_km2": 6905.7
+    },
+    {
+      "code": 6060000250,
+      "n_basins": 1,
+      "area_km2": 6533.8
+    },
+    {
+      "code": 6060004510,
+      "n_basins": 1,
+      "area_km2": 5292.3
+    },
+    {
+      "code": 6060002270,
+      "n_basins": 1,
+      "area_km2": 4976.5
+    },
+    {
+      "code": 6060001970,
+      "n_basins": 1,
+      "area_km2": 4888.6
+    },
+    {
+      "code": 6060003730,
+      "n_basins": 1,
+      "area_km2": 4281.1
+    },
+    {
+      "code": 6060000580,
+      "n_basins": 1,
+      "area_km2": 3202.3
+    },
+    {
+      "code": 6060000460,
+      "n_basins": 1,
+      "area_km2": 2753.9
+    },
+    {
+      "code": 6060000240,
+      "n_basins": 1,
+      "area_km2": 2186.3
+    },
+    {
+      "code": 6060003690,
+      "n_basins": 1,
+      "area_km2": 615.0
+    },
+    {
+      "code": 6060001920,
+      "n_basins": 1,
+      "area_km2": 331.0
+    },
+    {
+      "code": 6060004010,
+      "n_basins": 1,
+      "area_km2": 228.4
+    },
+    {
+      "code": 6060001950,
+      "n_basins": 1,
+      "area_km2": 70.2
+    },
+    {
+      "code": 6060004040,
+      "n_basins": 1,
+      "area_km2": 66.1
+    },
+    {
+      "code": 6060004480,
+      "n_basins": 1,
+      "area_km2": 29.6
+    }
+  ]
+}

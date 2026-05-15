@@ -1,0 +1,42 @@
+# HydroBASINS configuration
+
+hydrobasins:
+  level: 5
+  region: "sa"                     # South America
+  version: "v1c"
+  url: "https://data.hydrosheds.org/file/hydrobasins/standard/hybas_sa_lev05_v1c.zip"
+  
+  # Filter for Orinoquia basins
+  # HydroBASINS uses Pfafstetter coding; Orinoco main stem = code starting with 73...
+  # We'll filter programmatically by checking which outlet flows to the Orinoco main stem
+  orinoco_pfafstetter_prefix: null  # TBD — extract from spatial query
+  
+  # Alternative: filter by bounding box + spatial join to Orinoco basin mask
+  filter_method: "spatial"         # Use Orinoco basin shapefile to select sub-basins
+  
+  # Expected counts
+  expected_level5_basins_orinoquia: "200-400"  # approximate
+
+  # Storage
+  local_path: "data/hydrobasins/hybas_sa_lev05_v1c"
+
+# Orinoco basin reference polygon
+orinoco_basin:
+  source: "HydroSHEDS / GRDC basin delineation"
+  # Can also use a simple bounding box for initial filtering:
+  bbox: [-75.0, 2.0, -60.0, 10.0]  # [west, south, east, north]
+
+# Target cities for basin attribution context
+target_cities:
+  - name: "Bogotá"
+    lat: 4.7110
+    lon: -74.0721
+  - name: "Manizales"
+    lat: 5.0672
+    lon: -75.5174
+
+# Ocean masks for tagging maritime moisture sources
+oceans:
+  atlantic: "North/South Atlantic"
+  caribbean: "Caribbean Sea"  
+  pacific: "Eastern Pacific"

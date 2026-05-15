@@ -1,0 +1,25 @@
+project: rs-weather-data
+primary_bucket: gs://rs-weather-data-orbit
+existing_data_lake: gs://rs-weather-data-lake
+location: us-central1
+storage_class: STANDARD
+
+local_paths:
+  era5: /Volumes/GC_SDD1/ncdata/era5_sa
+  project_root: /Users/gac/research_projects/atmospheric_rivers_orinoquia
+
+prefixes:
+  raw_era5_pressure_levels: raw/era5/south_america/pressure_levels
+  raw_era5_surface: raw/era5/south_america/surface
+  curated_era5_zarr: curated/era5/south_america/zarr
+  hydrobasins: curated/hydrobasins
+  trajectories: trajectories
+  aggregated: aggregated
+  platform: platform/orbita
+  manifests: manifests
+
+sync_policy:
+  raw_era5: mirror_once_per_canonical_month_variable_file
+  trajectories: parquet_canonical_csv_only_for_browser_extracts
+  platform: rsync_after_each_asset_rebuild
+  avoid_duplicates: true

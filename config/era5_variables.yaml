@@ -1,0 +1,107 @@
+# ERA5 variable specifications for CDS API downloads
+
+# Domain
+domain:
+  north: 15.0
+  south: -60.0
+  west: -85.0
+  east: -30.0
+  grid_resolution: [0.25, 0.25]
+
+# Pressure levels (all 37 ERA5 standard levels)
+pressure_levels:
+  - 1
+  - 2
+  - 3
+  - 5
+  - 7
+  - 10
+  - 20
+  - 30
+  - 50
+  - 70
+  - 100
+  - 125
+  - 150
+  - 175
+  - 200
+  - 225
+  - 250
+  - 300
+  - 350
+  - 400
+  - 450
+  - 500
+  - 550
+  - 600
+  - 650
+  - 700
+  - 750
+  - 775
+  - 800
+  - 825
+  - 850
+  - 875
+  - 900
+  - 925
+  - 950
+  - 975
+  - 1000
+
+# Pressure-level variables
+pressure_level_variables:
+  - u_component_of_wind        # u (m/s)
+  - v_component_of_wind        # v (m/s)
+  - specific_humidity          # q (kg/kg)
+  - temperature                # t (K) — thermodynamics, density, validation
+  - geopotential               # z (m²/s²) — pressure-level height/altitude
+  - vertical_velocity          # w (Pa/s) — optional, expensive
+
+# Surface / single-level variables
+surface_variables:
+  - surface_pressure            # sp (Pa) — for height conversion
+  - evaporation                 # e (m of water / s, accumulated)
+  - total_column_water_vapour   # tcwv (kg/m²) — validation
+  - vertical_integral_of_eastward_water_vapour_flux  # viwve / IVT-u (kg m⁻¹ s⁻¹)
+  - vertical_integral_of_northward_water_vapour_flux  # viwvn / IVT-v (kg m⁻¹ s⁻¹)
+  - vertical_integral_of_divergence_of_moisture_flux  # moisture convergence/divergence
+  - boundary_layer_height       # blh (m) — PBL check
+  - total_precipitation         # tp (m, accumulated) — optional sink check
+  - 10m_u_component_of_wind     # u10 (m/s) — surface validation
+  - 10m_v_component_of_wind     # v10 (m/s) — surface validation
+  - 2m_temperature              # t2m (K) — near-surface temperature
+  - 2m_dewpoint_temperature     # d2m (K) — surface moisture
+  - volumetric_soil_water_layer_1  # swvl1 (m³/m³), 0–7 cm
+  - volumetric_soil_water_layer_2  # swvl2 (m³/m³), 7–28 cm
+  - volumetric_soil_water_layer_3  # swvl3 (m³/m³), 28–100 cm
+  - volumetric_soil_water_layer_4  # swvl4 (m³/m³), 100–289 cm
+  - soil_temperature_level_1       # stl1 (K), 0–7 cm
+  - soil_temperature_level_2       # stl2 (K), 7–28 cm
+  - soil_temperature_level_3       # stl3 (K), 28–100 cm
+  - soil_temperature_level_4       # stl4 (K), 100–289 cm
+
+# Time settings
+time:
+  frequency: "6h"               # 00:00, 06:00, 12:00, 18:00
+  format: "%Y-%m-%d %H:%M"
+
+# CDS dataset names
+datasets:
+  pressure_levels: "reanalysis-era5-pressure-levels"
+  surface: "reanalysis-era5-single-levels"
+
+# Storage
+storage:
+  base_path: "/Volumes/GC_SDD1/ncdata/era5_sa"
+  pressure_subdir: "pressure_levels"
+  surface_subdir: "surface"
+  chunk_months: true            # Download by month to avoid timeouts
+  verify_checksums: true
+
+# Data size estimates (per year)
+size_estimates:
+  pressure_level_per_var_gb: 14   # 221×301×37 levels×1460 times×4 bytes
+  surface_per_var_gb: 0.25        # 221×301×1460 times×4 bytes
+  total_per_year_gb: 58           # 4 pl vars + 7 sfc vars
+  working_set_15yr_gb: 870
+  full_45yr_tb: 2.6

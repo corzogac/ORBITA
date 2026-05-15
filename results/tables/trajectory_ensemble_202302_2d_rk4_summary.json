@@ -1,0 +1,26 @@
+{
+  "year":2023,
+  "month":2,
+  "start":"2023-02-01 00:00",
+  "end":"2023-02-28 18:00",
+  "rows":8248,
+  "trajectories":672,
+  "targets":[
+    "Bogot\u00e1",
+    "Manizales"
+  ],
+  "release_dates":[
+    "2023-02-01",
+    "2023-02-28"
+  ],
+  "levels_hpa":[
+    850,
+    700,
+    500
+  ],
+  "hours_back":72,
+  "step_hours":6,
+  "method":"2D fixed-pressure RK4 with time-dependent ERA5 u\/v\/q; no evaporation uptake yet",
+  "csv":"results\/tables\/trajectory_ensemble_202302_2d_rk4.csv",
+  "parquet":"results\/tables\/trajectory_ensemble_202302_2d_rk4.parquet"
+}

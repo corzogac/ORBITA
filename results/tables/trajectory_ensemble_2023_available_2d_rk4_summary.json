@@ -1,0 +1,20 @@
+{
+  "rows":62700,
+  "trajectories":5088,
+  "months":[
+    "2023-01",
+    "2023-02",
+    "2023-03",
+    "2023-04",
+    "2023-05",
+    "2023-06",
+    "2023-07"
+  ],
+  "release_dates":[
+    "2023-01-01",
+    "2023-07-31"
+  ],
+  "source":"2D fixed-pressure RK4 prototype for complete downloaded 2023 months",
+  "parquet":"results\/tables\/trajectory_ensemble_2023_available_2d_rk4.parquet",
+  "csv":"results\/tables\/trajectory_ensemble_2023_available_2d_rk4.csv"
+}
