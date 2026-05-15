@@ -192,6 +192,7 @@ def compute_monthly_budget(month_str, gdf, basin_mask, n_basins):
         if n_cells[b_idx] == 0:
             continue
         area_m2 = float(row["SUB_AREA"]) * 1e6  # km² → m²
+        n_days = (n_time - 1) * 6 / 24  # number of days in month
 
         # Convert kg m-2 to total kg over basin
         results[hybas] = {
@@ -216,12 +217,10 @@ def compute_monthly_budget(month_str, gdf, basin_mask, n_basins):
             # Mean IVT
             "ivt_magnitude_kg_ms": float(ivt_mag[b_idx]),
             "ivt_direction_deg": float(ivt_dir_deg[b_idx]),
-            # Derived: sink as equivalent mm/day over basin
-            "sink_mm_day": float(sink_rate[b_idx].mean() * 86400),  # kg m-2 s-1 → mm/day
-            "evap_mm_day": float(evap_total[b_idx] / area_m2 * RHO_W
-                                 / (n_time - 1) / (SECONDS_PER_6H / 86400)),
-            "precip_mm_day": float(precip_total[b_idx] / area_m2 * RHO_W
-                                   / (n_time - 1) / (SECONDS_PER_6H / 86400)),
+            # Derived: sink/evap/precip as mm/day
+            "sink_mm_day": float(sink_rate[b_idx].mean() * 86400),
+            "evap_mm_day": float(evap_total[b_idx] / RHO_W * 1000 / n_days),
+            "precip_mm_day": float(precip_total[b_idx] / RHO_W * 1000 / n_days),
         }
 
     return results

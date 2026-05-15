@@ -45,6 +45,8 @@
     <button class="tabBtn" data-tab="statisticsTab">3. Statistics</button>
     <button class="tabBtn" data-tab="methodsTab">4. Methods</button>
     <button class="tabBtn" data-tab="eulerianTab">5. Eulerian Budget</button>
+    <button class="tabBtn" data-tab="paperTab">6. Methodology</button>
+    <button class="tabBtn" data-tab="evapSourcesTab">7. Evap Sources</button>
   </nav>
 </header>
 <main id="mapExplorer" class="tabPanel active mainGrid">
@@ -140,6 +142,80 @@
   </div>
   <div id="eulerianTimeline" style="height:300px;margin-top:16px"></div>
   <p class="note" style="margin-top:8px">Select a basin in the Map Explorer tab, then switch here. Multi-month timeline shows sink (P−E) evolution. Multi-year baseline coming with expanded ERA5 archive.</p>
+</section>
+<section id="paperTab" class="tabPanel report">
+  <div class="callout"><h2>Methodology: ORBITA Eulerian–Lagrangian Framework</h2>
+    <p class="note">Scientific basis for moisture budget baseline calculation, evaporation source classification, and ENSO anomaly detection.</p>
+  </div>
+
+  <div class="methodGrid">
+    <div class="method"><h3>1. Eulerian Moisture Budget</h3>
+      <p class="note">The atmospheric water balance for a column over basin <i>B</i> with area <i>A</i>:</p>
+      <p class="note" style="font-family:monospace;background:#071321;padding:10px;border-radius:8px">
+        d(TCWV)/dt = E − P − ∇·(IVT)<br/>
+        Sink ≡ P − E = −∇·(IVT) − d(TCWV)/dt
+      </p>
+      <p class="note">Where TCWV = total column water vapor [kg/m²], E = evaporation, P = precipitation, IVT = vertically integrated vapor transport [kg/m/s]. Positive sink = net precipitation into the basin column. The divergence ∇·(IVT) uses ERA5's <code>vimdf</code> field directly — no numerical differentiation needed. All terms are area-averaged over HydroBASINS L6 polygons at 6-hourly resolution.</p>
+    </div>
+
+    <div class="method"><h3>2. Divergence Theorem</h3>
+      <p class="note" style="font-family:monospace;background:#071321;padding:10px;border-radius:8px">
+        ∬<sub>B</sub> ∇·(IVT) dA = ∮<sub>∂B</sub> (IVT · n̂) ds
+      </p>
+      <p class="note">The area-integrated moisture flux divergence equals the net lateral transport across the basin boundary. This means the budget captures both local processes (E, P) and remote moisture advection. A positive convergence (−∇·IVT > 0) indicates net moisture influx from neighboring regions — the Eulerian signature of flying rivers.</p>
+    </div>
+
+    <div class="method"><h3>3. Baseline & Climatology</h3>
+      <p class="note" style="font-family:monospace;background:#071321;padding:10px;border-radius:8px">
+        μ<sub>m</sub>(B) = (1/N) Σ<sub>y</sub> Sink(B, m, y)<br/>
+        σ<sub>m</sub>(B) = stddev over years
+      </p>
+      <p class="note">For each basin <i>B</i> and calendar month <i>m</i>, the baseline μ is the multi-year mean sink. With ≥5 years of ERA5 data, this captures the seasonal cycle. The anomaly ΔSink = Sink − μ reveals interannual variability — including ENSO signals. Currently with 7 months of 2023, the baseline is provisional; the statistical framework is in place for the full 2010–2024 archive.</p>
+    </div>
+
+    <div class="method"><h3>4. ENSO Signal Detection</h3>
+      <p class="note" style="font-family:monospace;background:#071321;padding:10px;border-radius:8px">
+        ΔSink(B,m,y) = Sink(B,m,y) − μ<sub>m</sub>(B)<br/>
+        Composite<sub>Niño</sub> = mean(ΔSink | ONI ≥ +0.5)<br/>
+        Composite<sub>Niña</sub> = mean(ΔSink | ONI ≤ −0.5)
+      </p>
+      <p class="note">Anomalies are stratified by Oceanic Niño Index (ONI). During El Niño, the Orinoquia–Andes corridor typically shows reduced moisture convergence (negative sink anomaly = drier). During La Niña, increased convergence (positive sink anomaly = wetter). The basin-level resolution allows spatial mapping of which sub-basins are most ENSO-sensitive — identifying where the flying-river intensity changes most.</p>
+    </div>
+
+    <div class="method"><h3>5. Evaporation Source Classification</h3>
+      <p class="note" style="font-family:monospace;background:#071321;padding:10px;border-radius:8px">
+        E<sub>min</sub>(m) = P<sub>10</sub>(E<sub>B</sub>(m)) across all basins<br/>
+        Bonus(B,m) = max(0, E<sub>B</sub>(m) − E<sub>min</sub>(m))
+      </p>
+      <p class="note">The standard evaporation minimum is the 10th percentile of basin-averaged evaporation for each month. Basins consistently exceeding this threshold (≥70% of months above) are classified as <b>primary sources</b> — healthy evaporation regions that sustain flying rivers. Basins with moderate bonus are <b>secondary sources</b>. This classification is recalculated as new years are added, tracking shifts in evaporation regimes under climate variability.</p>
+    </div>
+
+    <div class="method"><h3>6. Lagrangian–Eulerian Integration</h3>
+      <p class="note">The Eulerian budget answers <i>how much</i> moisture enters/exits each basin. The Lagrangian trajectories answer <i>where from</i> and <i>how long</i> the transport takes. Together:</p>
+      <p class="note">• Lagrangian source regions (trajectory origins) are cross-referenced with Eulerian evaporation sources — validating that high-bonus basins are indeed trajectory origins</p>
+      <p class="note">• Time-of-displacement from Lagrangian trajectories constrains the temporal window for Eulerian flux attribution</p>
+      <p class="note">• Basin pairs with strong Lagrangian connection AND Eulerian moisture gradient indicate active flying-river corridors</p>
+    </div>
+  </div>
+</section>
+<section id="evapSourcesTab" class="tabPanel report">
+  <div class="callout"><h2>Evaporation Source Regions</h2>
+    <p class="note">Basins classified by evaporation contribution above the monthly minimum baseline. Primary sources = consistently high evaporation that feeds flying rivers. Green-to-red gradient shows source intensity.</p>
+  </div>
+  <div class="heroGrid" id="evapMetrics">
+    <div class="feature"><div class="bigNumber" id="evNPrimary">–</div><h3>Primary Sources</h3><p class="note">Basins >75th percentile bonus, ≥70% months above baseline</p></div>
+    <div class="feature"><div class="bigNumber" id="evNSecondary">–</div><h3>Secondary Sources</h3><p class="note">Basins >50th percentile bonus evaporation</p></div>
+    <div class="feature"><div class="bigNumber" id="evBaselineMin">–</div><h3>Baseline Min</h3><p class="note" id="evBaselineNote">10th percentile evap, mm/day</p></div>
+    <div class="feature"><div class="bigNumber" id="evTopSource">–</div><h3>Top Source</h3><p class="note" id="evTopNote">Highest mean bonus evaporation</p></div>
+  </div>
+  <div id="evapMapContainer" style="height:450px;margin-top:16px;border-radius:14px;overflow:hidden"></div>
+  <div class="legend" style="position:static;margin-top:10px">
+    <div><span class="swatch" style="background:#ff6b6b;height:12px;width:12px;border-radius:3px"></span>Primary source</div>
+    <div><span class="swatch" style="background:#f9c74f;height:12px;width:12px;border-radius:3px"></span>Secondary source</div>
+    <div><span class="swatch" style="background:#93c5fd;height:12px;width:12px;border-radius:3px"></span>Contributor</div>
+    <div><span class="swatch" style="background:#1d4e89;height:12px;width:12px;border-radius:3px"></span>Minimal</div>
+  </div>
+  <p class="note" style="margin-top:8px">Classification recalculates with each new month/year of ERA5 data. Seasonal patterns emerge as the archive grows.</p>
 </section>
 <script>
 document.querySelectorAll('.tabBtn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tabPanel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.tab).classList.add('active');if(btn.dataset.tab==='mapExplorer'){setTimeout(()=>map.invalidateSize(),80)}}));
@@ -288,6 +364,51 @@ function renderEulerian(){
 // Load budgets when Eulerian tab is first clicked
 document.querySelector('[data-tab="eulerianTab"]').addEventListener('click',function(){
   if(!eBudget.loaded)loadEulerianBudgets().then(renderEulerian);else renderEulerian();
+});
+// ── Evaporation Sources Map ──────────────────────────────
+var evapMap=null, evapLayer=null, evapData=null;
+async function loadEvapSources(){
+  if(evapData)return;
+  try{
+    var geo=await fetchJsonAsset('evaporation_sources.geojson');
+    var csvText=await fetchTextAsset('basin_evaporation_sources.csv');
+    var parsed=Papa.parse(csvText,{header:true,dynamicTyping:false});
+    evapData={geo:geo,stats:parsed.data.filter(function(r){return r.hybas_id})};
+    console.log('Evap sources loaded:',evapData.geo.features.length,'basins');
+  }catch(e){console.warn('Evap sources load failed:',e.message);}
+}
+function renderEvapSources(){
+  if(!evapData){loadEvapSources().then(renderEvapSources);return;}
+  if(!evapMap){
+    evapMap=L.map('evapMapContainer',{preferCanvas:true,zoomControl:true}).setView([5.5,-72],6);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; CARTO',maxZoom:12}).addTo(evapMap);
+    setTimeout(function(){evapMap.invalidateSize();},100);
+  }
+  if(evapLayer)evapMap.removeLayer(evapLayer);
+  evapLayer=L.geoJSON(evapData.geo,{
+    style:function(f){return{color:f.properties.fill_color||'#1d4e89',weight:1,
+      fillColor:f.properties.fill_color||'#1d4e89',
+      fillOpacity:f.properties.fill_opacity||0.08}},
+    onEachFeature:function(f,l){
+      var p=f.properties;
+      l.bindPopup('<b>HB6_'+p.HYBAS_ID+'</b><br/>Class: <b>'+p.source_class+'</b><br/>Mean evap: '+(p.mean_evap?Number(p.mean_evap).toFixed(3):'N/A')+' mm/day<br/>Bonus: '+(p.mean_bonus?Number(p.mean_bonus).toFixed(3):'N/A')+' mm/day<br/>Months above baseline: '+p.months_above);
+    }
+  }).addTo(evapMap);
+  // Metrics
+  var stats=evapData.stats;
+  var primary=stats.filter(function(r){return r.source_class==='primary_source'});
+  var secondary=stats.filter(function(r){return r.source_class==='secondary_source'});
+  document.getElementById('evNPrimary').textContent=primary.length;
+  document.getElementById('evNSecondary').textContent=secondary.length;
+  var bonuses=stats.map(function(r){return Number(r.mean_bonus)||0}).filter(function(v){return v>0});
+  document.getElementById('evBaselineMin').textContent=bonuses.length?(Math.min.apply(null,bonuses)).toFixed(3):'–';
+  document.getElementById('evBaselineNote').textContent='Min mean bonus across basins, mm/day';
+  var top=bonuses.length?stats.reduce(function(a,b){return (Number(a.mean_bonus)||0)>(Number(b.mean_bonus)||0)?a:b}):null;
+  document.getElementById('evTopSource').textContent=top?'HB6_'+top.hybas_id:'–';
+  document.getElementById('evTopNote').textContent=top?(Number(top.mean_bonus)||0).toFixed(3)+' mm/d bonus, '+(Number(top.mean_evap)||0).toFixed(3)+' mm/d evap':'No data';
+}
+document.querySelector('[data-tab="evapSourcesTab"]').addEventListener('click',function(){
+  if(!evapData)loadEvapSources().then(renderEvapSources);else{renderEvapSources();setTimeout(function(){if(evapMap)evapMap.invalidateSize();},150);}
 });
 </script>
 </body>
