@@ -44,6 +44,7 @@
     <button class="tabBtn" data-tab="timeAnalysis">2. Time Analysis</button>
     <button class="tabBtn" data-tab="statisticsTab">3. Statistics</button>
     <button class="tabBtn" data-tab="methodsTab">4. Methods</button>
+    <button class="tabBtn" data-tab="eulerianTab">5. Eulerian Budget</button>
   </nav>
 </header>
 <main id="mapExplorer" class="tabPanel active mainGrid">
@@ -126,6 +127,19 @@
     <div class="method"><h3>e) Temporal aggregation</h3><p class="note">Outputs are aggregated over user-defined windows and monthly climatologies. Event-based analysis can be added for specific wet-season or extreme events.</p></div>
     <div class="method"><h3>f) Limitations</h3><p class="note">Uncertainty arises from ERA5 resolution, interpolation, trajectory-model sensitivity, vertical-motion assumptions, and the conversion from path contact to physical moisture contribution.</p></div>
   </div>
+</section>
+<section id="eulerianTab" class="tabPanel report">
+  <div class="callout"><h2>Eulerian Basin Moisture Budget</h2>
+    <p class="note">Divergence-theorem moisture budget from ERA5 IVT (viwve/viwvn/vimdf), total column water vapor (tcwv), evaporation (e) and precipitation (tp). Sink = P − E = −∇·IVT − d(TCWV)/dt. Positive sink = net precipitation into the basin.</p>
+  </div>
+  <div class="heroGrid" id="eulerianMetrics">
+    <div class="feature"><div class="bigNumber" id="eSink">–</div><h3>Sink (P−E)</h3><p class="note" id="eSinkNote">mm/day. Positive = net precipitation.</p></div>
+    <div class="feature"><div class="bigNumber" id="eConv">–</div><h3>Convergence</h3><p class="note" id="eConvNote">−∇·IVT, kg/m²/s. Positive = moisture converging.</p></div>
+    <div class="feature"><div class="bigNumber" id="eIVTmag">–</div><h3>Mean IVT</h3><p class="note" id="eIVTNote">kg/m/s. Direction arrow below.</p></div>
+    <div class="feature"><div class="bigNumber" id="eStore">–</div><h3>Storage Δ</h3><p class="note" id="eStoreNote">d(TCWV)/dt net change over month.</p></div>
+  </div>
+  <div id="eulerianTimeline" style="height:300px;margin-top:16px"></div>
+  <p class="note" style="margin-top:8px">Select a basin in the Map Explorer tab, then switch here. Multi-month timeline shows sink (P−E) evolution. Multi-year baseline coming with expanded ERA5 archive.</p>
 </section>
 <script>
 document.querySelectorAll('.tabBtn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tabPanel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.tab).classList.add('active');if(btn.dataset.tab==='mapExplorer'){setTimeout(()=>map.invalidateSize(),80)}}));
@@ -212,6 +226,69 @@ function draw(){state.layers.raw.clearLayers();state.layers.mean.clearLayers();s
 function updateStats(rows,ntraj,agreement){document.getElementById('nTraj').textContent=ntraj;document.getElementById('nPts').textContent=rows.length;const md=agreement.length?agreement.reduce((s,d)=>s+d.disp,0)/agreement.length:null;document.getElementById('meanDisp').textContent=md==null?'–':md.toFixed(1)+' km';const real=hasVolume(rows);const volumes=rows.filter(r=>Number(r.hour_back)===0).map(rowVolume).filter(v=>v>0);const avg=volumes.length?volumes.reduce((s,v)=>s+v,0)/volumes.length:null;document.getElementById('absVol').textContent=real?fmtM3(avg):'pending';document.getElementById('relVol').textContent=real?'100%':'proxy';const feat=state.basins?.features?.find(f=>String(f.properties.HYBAS_ID)===state.selectedBasin);document.getElementById('basinArea').textContent=feat&&feat.properties.SUB_AREA?Number(feat.properties.SUB_AREA).toFixed(0)+' km²':'–';const name=feat?(feat.properties.display_name||feat.properties.name):'No basin selected';document.getElementById('selectedBasinName').textContent=name;document.getElementById('statusNote').className='note '+(real?'ok':'warning');document.getElementById('statusNote').textContent=real?'Using physical transported-volume columns for m³ and relative contribution.':'Physical transported volume is not available yet in the prototype trajectories. The map/line agreement is valid for paths; contribution chart is still path-contact proxy until production rows include transport_volume_m3 or uptake_volume_m3.'}
 function updateCharts(rows,agreement){Plotly.react('agreementChart',[{x:agreement.map(d=>d.h),y:agreement.map(d=>d.disp),type:'scatter',mode:'lines+markers',line:{color:'#67e8f9'},marker:{color:'#f9c74f'},name:'dispersion km'}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:42,r:10,t:10,b:35},xaxis:{title:'hours backward',autorange:'reversed'},yaxis:{title:'km'}},{displayModeBar:false});const real=hasVolume(rows);const agg={};rows.forEach(r=>{const id=basinId(r.HYBAS_ID)||'ocean/unknown';agg[id]=(agg[id]||0)+(real?rowVolume(r):1)});const items=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,10);const total=items.reduce((s,d)=>s+d[1],0)||1;Plotly.react('contribChart',[{x:items.map(d=>100*d[1]/total),y:items.map(d=>d[0]==='ocean/unknown'?d[0]:'HB6_'+d[0]),type:'bar',orientation:'h',marker:{color:real?'#80ed99':'#93c5fd'}}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:112,r:10,t:10,b:35},xaxis:{title:real?'% transported volume':'% path contact proxy'},yaxis:{autorange:'reversed'}},{displayModeBar:false})}
 Promise.all([fetchJsonAsset('orinoco_l6_basins_simplified.geojson'),fetchTextAsset('trajectories_platform_current.csv').then(t=>Papa.parse(t,{header:true,dynamicTyping:false}).data.filter(r=>r.lat&&r.lon)),fetchTextAsset('arrival_basin_options.csv').then(t=>Papa.parse(t,{header:true,dynamicTyping:false}).data.filter(r=>r.arrival_HYBAS_ID))]).then(([basins,traj,opts])=>{state.basins=basins;state.trajectories=traj;state.basinOptions=opts;state.months=[...new Set(traj.map(r=>r.month||String(r.release_date).slice(0,7)))].sort();const ms=document.getElementById('monthSlider');ms.max=Math.max(0,state.months.length-1);ms.value=state.months.length-1;const bs=document.getElementById('basinSelect');basins.features.sort((a,b)=>String(a.properties.HYBAS_ID).localeCompare(String(b.properties.HYBAS_ID))).forEach(f=>{const o=document.createElement('option');o.value=String(f.properties.HYBAS_ID);const isArr=opts.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===o.value);o.textContent=(isArr?'★ ':'')+(f.properties.display_name||('HB6_'+o.value));bs.appendChild(o)});if(opts.length){state.selectedBasin=String(Math.trunc(Number(opts[0].arrival_HYBAS_ID)));bs.value=state.selectedBasin}setMonthDates();state.layers.basins=L.geoJSON(basins,{style:styleBasin,onEachFeature:(f,l)=>{const isArr=state.basinOptions.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===String(f.properties.HYBAS_ID));l.on('click',()=>{state.selectedBasin=String(f.properties.HYBAS_ID);bs.value=state.selectedBasin;draw()});l.bindPopup(`<b>${f.properties.display_name||('HB6_'+f.properties.HYBAS_ID)}</b><br/>HydroBASINS Level 6<br/>Area: ${Number(f.properties.SUB_AREA||0).toFixed(0)} km²<br/>${isArr?'★ Trajectory data available':'No trajectory data in current dataset'}<br/><br/>Click to use as arrival basin.`)}}).addTo(map);map.fitBounds(state.layers.basins.getBounds(),{padding:[20,20]});ms.addEventListener('input',()=>{setMonthDates();draw()});document.getElementById('dateSlider').addEventListener('input',()=>{clampLookback();draw()});document.getElementById('lookbackSlider').addEventListener('input',()=>{clampLookback();draw()});document.getElementById('lookaheadSlider').addEventListener('input',draw);bs.addEventListener('change',e=>{state.selectedBasin=e.target.value||null;draw()});draw()});})();
+// ── Eulerian Budget Engine ────────────────────────────────
+var eBudget={data:null,summaries:null,loaded:false};
+async function loadEulerianBudgets(){
+  if(eBudget.loaded)return;
+  try{
+    var csvText=await fetchTextAsset('basin_budgets.csv');
+    var parsed=Papa.parse(csvText,{header:true,dynamicTyping:false});
+    // Build lookup: hybas_id -> array of {month, sink_mm_day, ...}
+    var lookup={};
+    parsed.data.filter(function(r){return r.hybas_id}).forEach(function(r){
+      var h=String(Math.trunc(Number(r.hybas_id)));
+      if(!lookup[h])lookup[h]=[];
+      lookup[h].push({month:r.month,sink_mm_day:Number(r.sink_mm_day),
+        convergence_kg_s:Number(r.convergence_kg_s),
+        ivt_magnitude_kg_ms:Number(r.ivt_magnitude_kg_ms),
+        ivt_direction_deg:Number(r.ivt_direction_deg),
+        evap_mm_day:Number(r.evap_mm_day),
+        precip_mm_day:Number(r.precip_mm_day),
+        sink_rate_kg_s:Number(r.sink_rate_kg_s)});
+    });
+    // Sort each basin's months
+    Object.keys(lookup).forEach(function(h){
+      lookup[h].sort(function(a,b){return a.month.localeCompare(b.month)});
+    });
+    eBudget.data=lookup;
+    eBudget.loaded=true;
+    console.log('Eulerian budgets loaded:',Object.keys(lookup).length,'basins');
+  }catch(e){console.warn('Eulerian budget load failed:',e.message);}
+}
+function renderEulerian(){
+  if(!eBudget.loaded){loadEulerianBudgets().then(renderEulerian);return;}
+  if(!state.selectedBasin){return;}
+  var months=eBudget.data[state.selectedBasin];
+  var feat=state.basins&&state.basins.features?state.basins.features.find(function(f){return String(f.properties.HYBAS_ID)===state.selectedBasin}):null;
+  var name=feat?(feat.properties.display_name||('HB6_'+feat.properties.HYBAS_ID)):'Basin '+state.selectedBasin;
+  if(!months||!months.length){
+    document.getElementById('eSink').textContent='no data';
+    return;
+  }
+  // Use the latest/selected month (last in array) for summary
+  var m=months[months.length-1];
+  document.getElementById('eSink').textContent=m.sink_mm_day.toFixed(2)+' mm/d';
+  document.getElementById('eSinkNote').textContent=m.sink_mm_day>=0?'Net precipitation (P > E)':'Net evaporation (E > P)';
+  document.getElementById('eConv').textContent=(m.convergence_kg_s*1e6).toFixed(2)+' μg/m²/s';
+  document.getElementById('eConvNote').textContent='−∇·IVT, '+name;
+  document.getElementById('eIVTmag').textContent=m.ivt_magnitude_kg_ms.toFixed(0)+' kg/m/s';
+  document.getElementById('eIVTNote').textContent='Direction: '+m.ivt_direction_deg.toFixed(0)+'° (0=N,90=E)';
+  document.getElementById('eStore').textContent=(m.sink_rate_kg_s-m.convergence_kg_s>=0?'+':'')+((m.sink_rate_kg_s-m.convergence_kg_s)*1e6).toFixed(3)+' μg/m²/s';
+  document.getElementById('eStoreNote').textContent='d(TCWV)/dt rate';
+  // Timeline chart
+  var trace={x:months.map(function(d){return d.month}),y:months.map(function(d){return d.sink_mm_day}),
+    type:'bar',marker:{color:months.map(function(d){return d.sink_mm_day>=0?'#80ed99':'#ff6b6b'})},
+    name:'Sink (P−E) mm/day'};
+  Plotly.react('eulerianTimeline',[trace],{
+    paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',
+    font:{color:'#e7f0ff'},margin:{l:50,r:10,t:10,b:40},
+    xaxis:{title:'Month'},yaxis:{title:'Sink mm/day',zeroline:true,zerolinecolor:'#3a5a8c'}
+  },{displayModeBar:false});
+}
+// Load budgets when Eulerian tab is first clicked
+document.querySelector('[data-tab="eulerianTab"]').addEventListener('click',function(){
+  if(!eBudget.loaded)loadEulerianBudgets().then(renderEulerian);else renderEulerian();
+});
 </script>
 </body>
 </html>
