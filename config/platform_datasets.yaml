@@ -1,0 +1,30 @@
+# Scalable browser-facing dataset registry for ORBITA-style deployments.
+# Raw ERA5 and large Parquet/Zarr remain private or compute-facing; only compact
+# platform assets listed here are intended for direct browser access.
+project: rs-weather-data
+bucket: gs://rs-weather-data-orbit
+public_asset_base: https://storage.googleapis.com/rs-weather-data-orbit/platform/orbita/assets/
+hosting:
+  firebase_project: rs-weather-data
+  site: orbita-rs-weather-data
+  url: https://orbita-rs-weather-data.web.app
+regions:
+  orinoquia_andes:
+    label: Orinoquia–Andes
+    hydrobasins_level: 6
+    asset_prefix: platform/orbita/assets
+    current_assets:
+      basins: orinoco_l6_basins_simplified.geojson
+      trajectories: trajectories_platform_current.csv
+      arrival_options: arrival_basin_options.csv
+      metadata: platform_metadata.json
+    canonical_layers:
+      raw_era5: raw/era5/south_america
+      trajectories: trajectories/prototype_2d_rk4/partitioned
+      production_trajectories: trajectories/production_3d_rk4_v1
+      monthly_contributions: aggregated/monthly_contributions/version=v1
+future_regions:
+  pattern:
+    asset_prefix: platform/{region_slug}/assets
+    trajectories_prefix: trajectories/{model_version}/region={region_slug}/year=YYYY/month=MM
+    aggregates_prefix: aggregated/monthly_contributions/version={version}/region={region_slug}/year=YYYY/month=MM

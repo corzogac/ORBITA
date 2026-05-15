@@ -1,0 +1,41 @@
+# ORBITA Region Configuration
+# Each region defines a self-contained trajectory platform with its own
+# GCS asset path, geographic bounds, and display metadata.
+#
+# To add a new region:
+#   1. Upload region assets to gs://orbita-platform-data/<region_slug>/
+#      (index.html, assets/*.geojson, assets/*.csv, assets/*.json)
+#   2. Add a region entry below
+#   3. Redeploy via `firebase deploy --only hosting`
+#   4. Access at https://<site>/?region=<region_slug>
+
+regions:
+  orinoquia:
+    slug: orinoquia
+    display_name: "Orinoquia–Andes"
+    description: "Atmospheric moisture transport from the Orinoquia basin to the Colombian Andes"
+    asset_base: "https://storage.googleapis.com/orbita-platform-data/orinoquia/"
+    default_center: [4.7, -74.5]
+    default_zoom: 7
+    bbox: [[-5.0, -83.0], [16.0, -55.0]]
+    hydrobasins_level: 6
+    era5_domain: "south_america"
+    available_years: [2023]
+    available_months: [1, 2, 3, 4, 5, 6, 7]
+
+  # Example: future Amazon region
+  # amazon:
+  #   slug: amazon
+  #   display_name: "Amazon Basin"
+  #   description: "Moisture recycling and transport within the Amazon basin"
+  #   asset_base: "https://storage.googleapis.com/orbita-platform-data/amazon/"
+  #   default_center: [-3.0, -60.0]
+  #   default_zoom: 5
+  #   bbox: [[-20.0, -80.0], [5.0, -45.0]]
+  #   hydrobasins_level: 6
+  #   era5_domain: "south_america"
+  #   available_years: []
+  #   available_months: []
+
+default_region: orinoquia
+version: "1.0"

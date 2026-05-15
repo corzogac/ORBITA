@@ -1,0 +1,30 @@
+{
+  "hosting": [
+    {
+      "target": "orbita",
+      "public": "results/trajectory_platform",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "headers": [
+        {
+          "source": "**/*.@(html|js|css)",
+          "headers": [
+            { "key": "Cache-Control", "value": "no-cache, max-age=0" }
+          ]
+        },
+        {
+          "source": "assets/**/*.@(json|geojson|csv)",
+          "headers": [
+            { "key": "Cache-Control", "value": "public, max-age=300" }
+          ]
+        }
+      ],
+      "rewrites": [
+        { "source": "**", "destination": "/index.html" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "rs-weather-data"
+  },
+  "targets": {
+    "rs-weather-data": {
+      "hosting": {
+        "orbita": [
+          "orbita-rs-weather-data"
+        ]
+      }
+    }
+  }
+}

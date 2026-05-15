@@ -66,7 +66,7 @@
       <label class="tiny">HydroBASINS L6 basin</label>
       <select id="basinSelect"><option value="">Click or choose a basin</option></select>
       <div id="selectedBasinName" class="basin-name" style="margin-top:10px">No basin selected</div>
-      <p class="note">Only trajectories whose <code>hour_back=0</code> arrival point is inside the selected basin are used. With the current prototype data, available arrival basins are those containing Bogotá and Manizales; the platform is now structured for all basin arrivals once production trajectories are generated.</p>
+      <p class="note">Only trajectories whose <code>hour_back=0</code> arrival point is inside the selected basin are used. With the current prototype data, available arrival basins are those containing Bogotá and Manizales; the platform is now structured for all basin arrivals once production trajectories are generated.</p><p id="assetSourceNote" class="note"></p>
     </div>
     <div class="card">
       <h2>2. Selected window summary</h2>
@@ -129,10 +129,55 @@
 </section>
 <script>
 document.querySelectorAll('.tabBtn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tabPanel').forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.tab).classList.add('active');if(btn.dataset.tab==='mapExplorer'){setTimeout(()=>map.invalidateSize(),80)}}));
+// ── Region configuration ──────────────────────────────────
+const ORBITA_PARAMS=new URLSearchParams(window.location.search);
+const ORBITA_REGION_SLUG=ORBITA_PARAMS.get('region')||null;
+let ORBITA_REGION=null;  // filled from regions.json
+let ORBITA_ASSET_BASE='';
+async function loadRegionConfig(){
+  let regions;
+  try{
+    regions=await fetch('regions.json',{cache:'no-store'}).then(r=>r.json());
+  }catch(e){
+    // Fallback: try same-directory regions.json from asset base
+    const fb=ORBITA_PARAMS.get('assetBase');
+    if(fb){
+      try{regions=await fetch(fb.replace(/\/?$/,'/')+'regions.json',{cache:'no-store'}).then(r=>r.json());}catch(e2){}
+    }
+    if(!regions)regions={default_region:'orinoquia',regions:{orinoquia:{slug:'orinoquia',display_name:'Orinoquia–Andes',asset_base:'https://storage.googleapis.com/orbita-platform-data/orinoquia/',default_center:[4.7,-74.5],default_zoom:7}}};
+  }
+  const slug=ORBITA_REGION_SLUG||regions.default_region||'orinoquia';
+  ORBITA_REGION=regions.regions[slug]||Object.values(regions.regions)[0];
+  ORBITA_ASSET_BASE=(ORBITA_PARAMS.get('assetBase')||ORBITA_REGION.asset_base).replace(/\/?$/,'/');
+  document.getElementById('assetSourceNote').textContent='Region: '+ORBITA_REGION.display_name+' | assets: '+ORBITA_ASSET_BASE;
+  document.title='ORBITA – '+ORBITA_REGION.display_name;
+  if(regions.regions&&Object.keys(regions.regions).length>1){
+    // Build region switcher in header
+    const nav=document.querySelector('nav.tabs');
+    const sel=document.createElement('select');
+    sel.id='regionSwitcher';
+    sel.style.cssText='margin-left:12px;padding:6px 10px;border:1px solid #284669;border-radius:999px;background:#081827;color:#cfe4ff;font-weight:700;cursor:pointer';
+    Object.values(regions.regions).forEach(r=>{
+      const o=document.createElement('option');
+      o.value=r.slug;o.textContent=r.display_name;o.selected=r.slug===slug;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change',()=>{window.location.search='?region='+sel.value});
+    nav.appendChild(sel);
+  }
+  return ORBITA_REGION;
+}
+function assetUrl(name){return ORBITA_ASSET_BASE+'assets/'+name}
+async function fetchTextAsset(name){const url=assetUrl(name);const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(`Failed to fetch ${url}: HTTP ${r.status}`);return r.text()}
+async function fetchJsonAsset(name){const url=assetUrl(name);const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(`Failed to fetch ${url}: HTTP ${r.status}`);return r.json()}
 const state={basins:null, trajectories:[], basinOptions:[], months:[], monthDates:[], selectedBasin:null, layers:{basins:null, raw:L.layerGroup(), mean:L.layerGroup(), arrows:L.layerGroup(), markers:L.layerGroup()}};
-const map=L.map('map',{preferCanvas:true}).setView([4.7,-74.5],7);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:12}).addTo(map);
-state.layers.raw.addTo(map);state.layers.mean.addTo(map);state.layers.arrows.addTo(map);state.layers.markers.addTo(map);
+let map;
+// ── Async init: load region config → create map → fetch data ──
+(async function init(){
+  const region=await loadRegionConfig();
+  map=L.map('map',{preferCanvas:true}).setView(region.default_center||[4.7,-74.5],region.default_zoom||7);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:12}).addTo(map);
+  state.layers.raw.addTo(map);state.layers.mean.addTo(map);state.layers.arrows.addTo(map);state.layers.markers.addTo(map);
 function toNum(x){if(x===null||x===undefined)return null;if(typeof x==='string'&&(x.trim()===''||x.trim().toLowerCase()==='none'||x.trim().toLowerCase()==='nan'))return null;const v=Number(x);return Number.isFinite(v)?v:null}
 function basinId(x){const v=toNum(x);return v==null?null:String(Math.trunc(v))}
 function styleBasin(f){const id=String(f.properties.HYBAS_ID);const sel=id===state.selectedBasin;const arrival=state.basinOptions.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===id);return{color:sel?'#f9c74f':arrival?'#67e8f9':'#1d4e89',weight:sel?3:arrival?2:1,fillColor:sel?'#f9c74f':arrival?'#164e63':'#12385a',fillOpacity:sel?.32:arrival?.18:.055}}
@@ -151,7 +196,7 @@ function draw(){state.layers.raw.clearLayers();state.layers.mean.clearLayers();s
   const byHour={};rows.forEach(r=>{const h=Number(r.hour_back);if(!byHour[h])byHour[h]=[];byHour[h].push({lat:Number(r.lat),lon:Number(r.lon)})});const meanPts=[],agreement=[];Object.keys(byHour).map(Number).sort((a,b)=>b-a).forEach(h=>{const pts=byHour[h].filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));if(!pts.length)return;const mean={lat:pts.reduce((s,p)=>s+p.lat,0)/pts.length,lon:pts.reduce((s,p)=>s+p.lon,0)/pts.length};const disp=pts.length>1?pts.reduce((s,p)=>s+distKm(p,mean),0)/pts.length:0;const score=pts.length/(1+disp/25);meanPts.push({...mean,h,disp,n:pts.length,score});agreement.push({h,disp,n:pts.length,score})});for(let i=1;i<meanPts.length;i++){const p0=meanPts[i-1],p1=meanPts[i];const w=Math.max(2,Math.min(12,2+p1.score*2.3));L.polyline([[p0.lat,p0.lon],[p1.lat,p1.lon]],{color:'#67e8f9',weight:w,opacity:.94,lineCap:'round'}).bindTooltip(`${p0.h}→${p1.h} h back-to-arrival | n=${p1.n} | dispersion=${p1.disp.toFixed(1)} km`).addTo(state.layers.mean);addArrow(p0,p1,false)}if(meanPts.length){const origin=meanPts[0],arr=meanPts[meanPts.length-1];L.circleMarker([origin.lat,origin.lon],{radius:5,color:'#93c5fd',fillOpacity:.9}).bindTooltip('mean older/source position').addTo(state.layers.markers);L.circleMarker([arr.lat,arr.lon],{radius:6,color:'#80ed99',fillOpacity:.95}).bindTooltip('arrival basin position (0 h)').addTo(state.layers.markers)}updateStats(rows,Object.keys(byTraj).length,agreement);updateCharts(rows,agreement)}
 function updateStats(rows,ntraj,agreement){document.getElementById('nTraj').textContent=ntraj;document.getElementById('nPts').textContent=rows.length;const md=agreement.length?agreement.reduce((s,d)=>s+d.disp,0)/agreement.length:null;document.getElementById('meanDisp').textContent=md==null?'–':md.toFixed(1)+' km';const real=hasVolume(rows);const volumes=rows.filter(r=>Number(r.hour_back)===0).map(rowVolume).filter(v=>v>0);const avg=volumes.length?volumes.reduce((s,v)=>s+v,0)/volumes.length:null;document.getElementById('absVol').textContent=real?fmtM3(avg):'pending';document.getElementById('relVol').textContent=real?'100%':'proxy';const feat=state.basins?.features?.find(f=>String(f.properties.HYBAS_ID)===state.selectedBasin);document.getElementById('basinArea').textContent=feat&&feat.properties.SUB_AREA?Number(feat.properties.SUB_AREA).toFixed(0)+' km²':'–';const name=feat?(feat.properties.display_name||feat.properties.name):'No basin selected';document.getElementById('selectedBasinName').textContent=name;document.getElementById('statusNote').className='note '+(real?'ok':'warning');document.getElementById('statusNote').textContent=real?'Using physical transported-volume columns for m³ and relative contribution.':'Physical transported volume is not available yet in the prototype trajectories. The map/line agreement is valid for paths; contribution chart is still path-contact proxy until production rows include transport_volume_m3 or uptake_volume_m3.'}
 function updateCharts(rows,agreement){Plotly.react('agreementChart',[{x:agreement.map(d=>d.h),y:agreement.map(d=>d.disp),type:'scatter',mode:'lines+markers',line:{color:'#67e8f9'},marker:{color:'#f9c74f'},name:'dispersion km'}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:42,r:10,t:10,b:35},xaxis:{title:'hours backward',autorange:'reversed'},yaxis:{title:'km'}},{displayModeBar:false});const real=hasVolume(rows);const agg={};rows.forEach(r=>{const id=basinId(r.HYBAS_ID)||'ocean/unknown';agg[id]=(agg[id]||0)+(real?rowVolume(r):1)});const items=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,10);const total=items.reduce((s,d)=>s+d[1],0)||1;Plotly.react('contribChart',[{x:items.map(d=>100*d[1]/total),y:items.map(d=>d[0]==='ocean/unknown'?d[0]:'HB6_'+d[0]),type:'bar',orientation:'h',marker:{color:real?'#80ed99':'#93c5fd'}}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:112,r:10,t:10,b:35},xaxis:{title:real?'% transported volume':'% path contact proxy'},yaxis:{autorange:'reversed'}},{displayModeBar:false})}
-Promise.all([fetch('assets/orinoco_l6_basins_simplified.geojson').then(r=>r.json()),fetch('assets/trajectories_platform_current.csv').then(r=>r.text()).then(t=>Papa.parse(t,{header:true,dynamicTyping:false}).data.filter(r=>r.lat&&r.lon)),fetch('assets/arrival_basin_options.csv').then(r=>r.text()).then(t=>Papa.parse(t,{header:true,dynamicTyping:false}).data.filter(r=>r.arrival_HYBAS_ID))]).then(([basins,traj,opts])=>{state.basins=basins;state.trajectories=traj;state.basinOptions=opts;state.months=[...new Set(traj.map(r=>r.month||String(r.release_date).slice(0,7)))].sort();const ms=document.getElementById('monthSlider');ms.max=Math.max(0,state.months.length-1);ms.value=state.months.length-1;const bs=document.getElementById('basinSelect');basins.features.sort((a,b)=>String(a.properties.HYBAS_ID).localeCompare(String(b.properties.HYBAS_ID))).forEach(f=>{const o=document.createElement('option');o.value=String(f.properties.HYBAS_ID);const isArr=opts.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===o.value);o.textContent=(isArr?'★ ':'')+(f.properties.display_name||('HB6_'+o.value));bs.appendChild(o)});if(opts.length){state.selectedBasin=String(Math.trunc(Number(opts[0].arrival_HYBAS_ID)));bs.value=state.selectedBasin}setMonthDates();state.layers.basins=L.geoJSON(basins,{style:styleBasin,onEachFeature:(f,l)=>{l.on('click',()=>{state.selectedBasin=String(f.properties.HYBAS_ID);bs.value=state.selectedBasin;draw()});l.bindPopup(`<b>${f.properties.display_name||('HB6_'+f.properties.HYBAS_ID)}</b><br/>HydroBASINS Level 6<br/>Area: ${Number(f.properties.SUB_AREA||0).toFixed(0)} km²<br/><br/>Click to use as arrival basin.`)}}).addTo(map);map.fitBounds(state.layers.basins.getBounds(),{padding:[20,20]});ms.addEventListener('input',()=>{setMonthDates();draw()});document.getElementById('dateSlider').addEventListener('input',draw);document.getElementById('lookbackSlider').addEventListener('input',draw);document.getElementById('lookaheadSlider').addEventListener('input',draw);bs.addEventListener('change',e=>{state.selectedBasin=e.target.value||null;draw()});draw()});
+Promise.all([fetchJsonAsset('orinoco_l6_basins_simplified.geojson'),fetchTextAsset('trajectories_platform_current.csv').then(t=>Papa.parse(t,{header:true,dynamicTyping:false}).data.filter(r=>r.lat&&r.lon)),fetchTextAsset('arrival_basin_options.csv').then(t=>Papa.parse(t,{header:true,dynamicTyping:false}).data.filter(r=>r.arrival_HYBAS_ID))]).then(([basins,traj,opts])=>{state.basins=basins;state.trajectories=traj;state.basinOptions=opts;state.months=[...new Set(traj.map(r=>r.month||String(r.release_date).slice(0,7)))].sort();const ms=document.getElementById('monthSlider');ms.max=Math.max(0,state.months.length-1);ms.value=state.months.length-1;const bs=document.getElementById('basinSelect');basins.features.sort((a,b)=>String(a.properties.HYBAS_ID).localeCompare(String(b.properties.HYBAS_ID))).forEach(f=>{const o=document.createElement('option');o.value=String(f.properties.HYBAS_ID);const isArr=opts.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===o.value);o.textContent=(isArr?'★ ':'')+(f.properties.display_name||('HB6_'+o.value));bs.appendChild(o)});if(opts.length){state.selectedBasin=String(Math.trunc(Number(opts[0].arrival_HYBAS_ID)));bs.value=state.selectedBasin}setMonthDates();state.layers.basins=L.geoJSON(basins,{style:styleBasin,onEachFeature:(f,l)=>{l.on('click',()=>{state.selectedBasin=String(f.properties.HYBAS_ID);bs.value=state.selectedBasin;draw()});l.bindPopup(`<b>${f.properties.display_name||('HB6_'+f.properties.HYBAS_ID)}</b><br/>HydroBASINS Level 6<br/>Area: ${Number(f.properties.SUB_AREA||0).toFixed(0)} km²<br/><br/>Click to use as arrival basin.`)}}).addTo(map);map.fitBounds(state.layers.basins.getBounds(),{padding:[20,20]});ms.addEventListener('input',()=>{setMonthDates();draw()});document.getElementById('dateSlider').addEventListener('input',draw);document.getElementById('lookbackSlider').addEventListener('input',draw);document.getElementById('lookaheadSlider').addEventListener('input',draw);bs.addEventListener('change',e=>{state.selectedBasin=e.target.value||null;draw()});draw()});})();
 </script>
 </body>
 </html>

@@ -14,6 +14,7 @@ Usage: $0 <command>
 
 Commands:
   ensure-bucket      Create ${GS} if missing, with uniform bucket-level access.
+  public-platform    Grant public read only for ${GS}/platform/orbita/** browser assets.
   sync-platform      Sync static ORBITA platform assets to ${GS}/platform/orbita/
   sync-processed     Sync processed trajectory summaries/assets to GCS (no raw ERA5).
   sync-era5-raw      Sync canonical raw ERA5 NetCDF archive from external disk to GCS.
@@ -43,11 +44,23 @@ ensure_bucket() {
   gsutil uniformbucketlevelaccess set on "${GS}" >/dev/null
 }
 
+public_platform() {
+  ensure_bucket
+  command -v gcloud >/dev/null || { echo "gcloud not found" >&2; exit 1; }
+  # Keep raw ERA5/private compute products protected. Only compact browser-facing
+  # files under platform/orbita/ are public so Firebase/static browsers can read them.
+  gcloud storage buckets add-iam-policy-binding "${GS}" \
+    --member="allUsers" \
+    --role="roles/storage.objectViewer" \
+    --condition="expression=resource.name.startsWith('projects/_/buckets/${BUCKET}/objects/platform/orbita/'),title=public-orbita-platform,description=Public read for compact ORBITA browser assets only" \
+    --project="${PROJECT_ID}"
+}
+
 sync_platform() {
   ensure_bucket
   gsutil -m rsync -r "${ROOT}/results/trajectory_platform" "${GS}/platform/orbita"
-  gsutil -m rsync -r "${ROOT}/results" "${GS}/processed/results_index" \
-    -x '(^|.*/)(tables/.*\.(csv|parquet)|.*\.tmp|.*\.log)$'
+  gsutil -m rsync -x '(^|.*/)(tables/.*\.(csv|parquet)|.*\.tmp|.*\.log)$' \
+    -r "${ROOT}/results" "${GS}/processed/results_index"
 }
 
 sync_processed() {
@@ -92,6 +105,7 @@ inventory() {
 cmd="${1:-}"
 case "${cmd}" in
   ensure-bucket) ensure_bucket ;;
+  public-platform) public_platform ;;
   sync-platform) sync_platform ;;
   sync-processed) sync_processed ;;
   sync-era5-raw) sync_era5_raw ;;
