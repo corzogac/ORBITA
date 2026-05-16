@@ -1,561 +1,189 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ORBITA – Orinoquia–Andes Basin Integrated Trajectory Analysis</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-  <style>
-    :root{--bg:#07111f;--panel:#0d1b2e;--muted:#99abc2;--text:#e7f0ff;--cyan:#67e8f9;--gold:#f9c74f;--green:#80ed99;--red:#ff6b6b;--blue:#93c5fd;--amber:#f9844a}
-    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;overflow-x:hidden}
-    header{padding:18px 22px;border-bottom:1px solid #1f3554;background:linear-gradient(135deg,#081425,#0c2138 70%,#12385a)}
-    h1{margin:0;font-size:24px}.subtitle{color:var(--muted);margin-top:6px;line-height:1.45;max-width:1260px}
-    .badge{display:inline-block;border:1px solid #284669;border-radius:999px;padding:3px 9px;color:#b7d6ff;margin-right:6px;font-size:12px;background:#0b1a2b}
-    main{display:grid;grid-template-columns:390px 1fr;min-height:calc(100vh - 104px)}
-    aside{padding:16px;border-right:1px solid #1f3554;background:#09182a;overflow:auto;max-height:calc(100vh - 104px)}
-    .mapwrap{position:relative}#map{height:calc(100vh - 104px);background:#07111f}
-    .card{background:var(--panel);border:1px solid #1f3554;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 12px 35px #0005}
-    .card h2{font-size:16px;margin:0 0 10px}.note{font-size:13px;color:var(--muted);line-height:1.4}
-    .metric{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric div{background:#071321;border:1px solid #1b304c;border-radius:10px;padding:9px}
-    .metric b{display:block;font-size:20px}.metric span{font-size:12px;color:var(--muted)}
-    select,input[type=range]{width:100%;accent-color:#67e8f9}
-    .legend{position:absolute;right:14px;bottom:20px;z-index:700;background:#07111fde;border:1px solid #2c4d73;border-radius:12px;padding:11px;font-size:13px;color:#dcecff}
-    .swatch{display:inline-block;width:26px;height:4px;border-radius:3px;margin-right:7px;vertical-align:middle}
-    .leaflet-container{background:#07111f}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0d1b2e;color:#e7f0ff;border:1px solid #31577f}
-    .tiny{font-size:12px;color:#8aa1bc}.warning{border-left:3px solid var(--gold);padding-left:10px;color:#ffd880}
-    .ok{border-left:3px solid var(--green);padding-left:10px;color:#b9fbc0}
-    .arrowIcon{color:#67e8f9;text-shadow:0 0 6px #001;font-size:18px;line-height:18px}.rawArrow{color:#c7f9ff;opacity:.45;font-size:13px}
-    .basin-name{font-weight:800;color:#f9c74f;line-height:1.3}.sliderRow{margin:10px 0}
-    .dual{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .pill{display:inline-block;border-radius:8px;background:#071321;border:1px solid #1b304c;padding:4px 7px;margin:2px;color:#cfe4ff;font-size:12px}
-    #contribChart,#agreementChart{height:235px}
-    .brand{display:flex;align-items:center;gap:16px}.logo{width:72px;height:72px;flex:0 0 auto;filter:drop-shadow(0 0 18px rgba(103,232,249,.35))}
-    .brand-title{display:flex;flex-direction:column;gap:2px}.kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#80ed99;font-weight:800}
-    .tagline{color:#d7e9ff;font-size:13px;margin-top:4px}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-    .tabBtn{border:1px solid #284669;background:#081827;color:#cfe4ff;border-radius:999px;padding:9px 13px;font-weight:700;cursor:pointer}
-    .tabBtn.active{background:linear-gradient(135deg,#67e8f9,#80ed99);color:#06111f;border-color:transparent}
-    .tabPanel{display:none}.tabPanel.active{display:block}.tabPanel.active.mainGrid{display:grid}
-    .tabPanel:not(.active){display:none!important}.mainGrid{display:grid;grid-template-columns:390px 1fr;min-height:calc(100vh - 154px)}
-    .mainGrid #map{height:calc(100vh - 154px)}
-    .report{padding:22px 28px;max-width:1260px;margin:0 auto;overflow-y:auto;max-height:calc(100vh - 154px)}
-    .heroGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
-    .feature{background:#071321;border:1px solid #1b304c;border-radius:16px;padding:16px}
-    .feature h3{margin:0 0 8px;color:#dff8ff}.bigNumber{font-size:34px;font-weight:900;color:#67e8f9}
-    .callout{background:linear-gradient(135deg,rgba(103,232,249,.11),rgba(128,237,153,.08));border:1px solid #2d6074;border-radius:18px;padding:18px;margin-bottom:18px}
-    .methodGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
-    .method{background:#0b1b2d;border:1px solid #23415f;border-radius:16px;padding:16px}
-    .method h3{margin:0 0 8px;color:#80ed99}
-    .pumpState{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-weight:700;font-size:13px}
-    .pumpActive{background:rgba(128,237,153,.15);color:#80ed99;border:1px solid #2d6b3f}
-    .pumpCritical{background:rgba(249,196,79,.15);color:#f9c74f;border:1px solid #6b5a2d}
-    .pumpDegraded{background:rgba(255,107,107,.15);color:#ff6b6b;border:1px solid #6b2d2d}
-    .eq{font-family:monospace;background:#071321;padding:10px;border-radius:8px;margin:8px 0;overflow-x:auto}
-    #eulerianTimeline,#nbmiTimeline{height:300px;margin-top:16px}
-    .ref{font-size:12px;color:var(--muted);line-height:1.5;padding-left:14px;border-left:2px solid #2d3f5c}
-    @media(max-width:900px){.mainGrid{grid-template-columns:1fr}.mainGrid #map{height:68vh}aside{border-right:0;border-bottom:1px solid #1f3554}.brand{align-items:flex-start}.logo{width:56px;height:56px}.report{max-height:none}}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ORBITA</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+:root{--bg:#07111f;--panel:#0d1b2e;--muted:#99abc2;--text:#e7f0ff;--cyan:#67e8f9;--gold:#f9c74f;--green:#80ed99;--red:#ff6b6b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif}
+header{padding:12px 18px;border-bottom:1px solid #1f3554;background:linear-gradient(135deg,#081425,#0c2138)}h1{margin:0;font-size:20px;display:inline}
+.badge{display:inline-block;border:1px solid #284669;border-radius:999px;padding:2px 8px;color:#b7d6ff;margin:0 4px;font-size:11px;background:#0b1a2b;vertical-align:middle}
+.tabs{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.tabBtn{border:1px solid #284669;background:#081827;color:#cfe4ff;border-radius:999px;padding:7px 11px;font-weight:700;cursor:pointer;font-size:13px}
+.tabBtn.active{background:linear-gradient(135deg,#67e8f9,#80ed99);color:#06111f;border-color:transparent}
+.tabPanel{display:none}.tabPanel.active{display:block}.tabPanel.active.mainGrid{display:grid}
+.mainGrid{display:grid;grid-template-columns:350px 1fr;height:calc(100vh - 90px)}
+aside{padding:12px;border-right:1px solid #1f3554;background:#09182a;overflow:auto}
+.mapwrap{position:relative}#map{height:100%;background:#07111f}
+.card{background:var(--panel);border:1px solid #1f3554;border-radius:12px;padding:12px;margin-bottom:10px}
+.card h2{font-size:14px;margin:0 0 8px}.note{font-size:12px;color:var(--muted);line-height:1.3}
+select,input,button{width:100%;padding:6px 8px;border-radius:8px;border:1px solid #284669;background:#081827;color:#e7f0ff;font-size:13px;margin:3px 0}
+button{background:linear-gradient(135deg,#67e8f9,#3b82f6);color:#06111f;font-weight:700;cursor:pointer;border:none;padding:8px}
+button:disabled{opacity:.4;cursor:default}
+.metric{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.metric div{background:#071321;border:1px solid #1b304c;border-radius:8px;padding:6px}
+.metric b{display:block;font-size:16px}.metric span{font-size:10px;color:var(--muted)}
+.basin-name{font-weight:800;color:#f9c74f}.legend{position:absolute;right:10px;bottom:16px;z-index:700;background:#07111fde;border:1px solid #2c4d73;border-radius:10px;padding:8px;font-size:11px;color:#dcecff}
+.swatch{display:inline-block;width:20px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.report{padding:18px 24px;max-width:1100px;margin:0 auto;overflow-y:auto;max-height:calc(100vh - 100px)}
+.feature{background:#071321;border:1px solid #1b304c;border-radius:14px;padding:14px}.feature h3{margin:0 0 6px;font-size:14px}.bigNumber{font-size:28px;font-weight:900;color:#67e8f9}
+.heroGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px}
+.callout{background:linear-gradient(135deg,rgba(103,232,249,.11),rgba(128,237,153,.08));border:1px solid #2d6074;border-radius:14px;padding:14px;margin-bottom:14px}
+.method{background:#0b1b2d;border:1px solid #23415f;border-radius:14px;padding:14px}.method h3{margin:0 0 6px;color:#80ed99;font-size:14px}
+.methodGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.eq{font-family:monospace;background:#071321;padding:8px;border-radius:8px;margin:6px 0;font-size:12px}
+.arrowIcon{color:#67e8f9;text-shadow:0 0 6px #001;font-size:18px;line-height:18px}.rawArrow{color:#c7f9ff;opacity:.45;font-size:13px}
+</style>
 </head>
 <body>
 <header>
-  <div class="brand">
-    <svg class="logo" viewBox="0 0 120 120" aria-label="ORBITA logo">
-      <defs><linearGradient id="orbitaG" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#67e8f9"/><stop offset=".58" stop-color="#3b82f6"/><stop offset="1" stop-color="#80ed99"/></linearGradient></defs>
-      <circle cx="60" cy="60" r="47" fill="rgba(103,232,249,.08)" stroke="url(#orbitaG)" stroke-width="4" stroke-dasharray="178 44" stroke-linecap="round"/>
-      <path d="M94 31 L108 28 L101 41" fill="none" stroke="#80ed99" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M39 38 C50 28 73 33 82 49 C93 70 71 88 52 83 C35 79 27 61 35 47 Z" fill="rgba(128,237,153,.22)" stroke="#80ed99" stroke-width="2"/>
-      <path d="M18 72 C38 56 52 62 68 50 C82 40 93 42 104 35" fill="none" stroke="#e8f7ff" stroke-width="3" stroke-linecap="round" opacity=".85"/>
-      <path d="M16 85 C38 70 54 76 75 63 C88 55 98 58 110 50" fill="none" stroke="#67e8f9" stroke-width="2" stroke-linecap="round" opacity=".6"/>
-      <circle cx="60" cy="60" r="5" fill="#f9c74f"/>
-    </svg>
-    <div class="brand-title">
-      <div class="kicker">ORBITA</div>
-      <h1>Orinoquia–Andes Basin Integrated Trajectory Analysis</h1>
-      <div class="tagline">Lagrangian pathways · Eulerian budgets · Net Basin Moisture Injection</div>
-      <div class="subtitle">
-        <span class="badge">HydroBASINS L6</span><span class="badge">75 arrival basins</span><span class="badge">backward trajectories</span><span class="badge">NBMI anomaly diagnostics</span>
-      </div>
-    </div>
-  </div>
-  <nav class="tabs" aria-label="ORBITA tabs">
-    <button class="tabBtn active" data-tab="mapExplorer">1. Map Explorer</button>
-    <button class="tabBtn" data-tab="eulerianTab">2. Eulerian Budget</button>
-    <button class="tabBtn" data-tab="methodsTab">3. Methodology</button>
-  </nav>
+<h1>ORBITA</h1>
+<span class="badge">201 basins</span><span class="badge">12 months</span><span class="badge">Lagrangian+Eulerian</span>
+<nav class="tabs">
+<button class="tabBtn active" data-tab="mapTab">1. Map</button>
+<button class="tabBtn" data-tab="budgetTab">2. Budget</button>
+<button class="tabBtn" data-tab="methodsTab">3. Methods</button>
+</nav>
 </header>
 
-<!-- ═══════ TAB 1: MAP EXPLORER ═══════ -->
-<main id="mapExplorer" class="tabPanel active mainGrid">
-  <aside>
-    <div class="card">
-      <h2>Select basin and time window</h2>
-      <label class="tiny">Month</label>
-      <input id="monthSlider" type="range" min="0" max="0" value="0" />
-      <div id="monthLabel" class="note">Loading…</div>
-      <div class="sliderRow">
-        <label class="tiny">Arrival day</label>
-        <input id="dateSlider" type="range" min="0" max="0" value="0" />
-        <div id="dateLabel" class="note">Loading…</div>
-      </div>
-      <div class="dual">
-        <div><label class="tiny">Lookback days</label><input id="lookbackSlider" type="range" min="1" max="45" value="30" /><div id="lookbackLabel" class="note">30 days (within month)</div></div>
-        <div><label class="tiny">Forward days</label><input id="lookaheadSlider" type="range" min="0" max="15" value="0" /><div id="lookaheadLabel" class="note">+0 days forward</div></div>
-      </div>
-      <br/>
-      <label class="tiny">HydroBASINS L6 basin</label>
-      <select id="basinSelect"><option value="">Click or choose a basin</option></select>
-      <div id="selectedBasinName" class="basin-name" style="margin-top:10px">No basin selected</div>
-      <p class="note">Trajectories filtered where <code>hour_back=0</code> falls inside the selected basin. ★ = has arrival data.</p>
-      <p id="assetSourceNote" class="note"></p>
-    </div>
-    <div class="card">
-      <h2>Trajectory summary</h2>
-      <div class="metric">
-        <div><b id="nTraj">–</b><span>arriving trajectories</span></div>
-        <div><b id="nPts">–</b><span>trajectory points</span></div>
-        <div><b id="meanDisp">–</b><span>mean dispersion</span></div>
-        <div><b id="absVol">–</b><span>transported volume</span></div>
-        <div><b id="relVol">–</b><span>relative contribution</span></div>
-        <div><b id="basinArea">–</b><span>basin area</span></div>
-      </div>
-      <p id="statusNote" class="note warning"></p>
-    </div>
-    <div class="card">
-      <h2>Agreement by travel time</h2>
-      <div id="agreementChart"></div>
-      <p class="note">Thicker corridors = stronger path agreement. Direction: high <code>hour_back</code> → <code>0 h</code> (origin → arrival).</p>
-    </div>
-    <div class="card">
-      <h2>Source contribution along path</h2>
-      <div id="contribChart"></div>
-      <p class="note">Path-contact proxy until production moisture uptake engine is complete.</p>
-    </div>
-  </aside>
-  <section class="mapwrap">
-    <div id="map"></div>
-    <div class="legend">
-      <div><span class="swatch" style="background:#bdefff;opacity:.45"></span>individual paths</div>
-      <div><span class="swatch" style="background:#67e8f9;height:8px"></span>agreement-weighted mean</div>
-      <div><span class="swatch" style="background:#f9c74f;height:8px"></span>selected arrival basin</div>
-    </div>
-  </section>
+<main id="mapTab" class="tabPanel active mainGrid">
+<aside>
+<div class="card"><h2>1. Click a basin on the map</h2><div class="basin-name" id="selName">No basin selected</div><div class="note" id="selDetail"></div></div>
+<div class="card"><h2>2. Choose month</h2><select id="monthSel"></select></div>
+<div class="card"><h2>3. Load</h2><button id="loadBtn" disabled onclick="loadAndDraw()">Load Trajectories</button><div id="loadStatus" class="note"></div></div>
+<div class="card"><h2>Summary</h2><div class="metric"><div><b id="nTraj">–</b><span>trajectories</span></div><div><b id="nPts">–</b><span>points</span></div><div><b id="nDisp">–</b><span>dispersion</span></div></div></div>
+<div class="card"><h2>Source basins</h2><div id="sourceChart" style="height:200px"></div><p class="note">Basins crossed by trajectories, NBMI-weighted.</p></div>
+</aside>
+<section class="mapwrap"><div id="map"></div><div class="legend"><div><span class="swatch" style="background:#c7f9ff;opacity:.45"></span>paths</div><div><span class="swatch" style="background:#67e8f9;height:6px"></span>mean</div></div></section>
 </main>
 
-<!-- ═══════ TAB 2: EULERIAN BUDGET ═══════ -->
-<section id="eulerianTab" class="tabPanel report">
-  <div class="callout"><h2>Net Basin Moisture Injection (NBMI)</h2>
-    <p class="note">Eulerian moisture budget via divergence theorem. NBMI = −Sink = moisture exported from basin to atmosphere. Positive NBMI = basin injects moisture into flying rivers. Framework supports multiyear NBMI<sub>anom</sub> for dry-season green-up and ENSO diagnostics.</p>
-  </div>
-
-  <!-- Pump state indicator -->
-  <div style="margin-bottom:16px">
-    <span id="pumpStateBadge" class="pumpState pumpActive">Select a basin in Map Explorer</span>
-    <span style="margin-left:12px;font-size:13px;color:var(--muted)" id="pumpStateDetail"></span>
-  </div>
-
-  <div class="heroGrid">
-    <div class="feature"><div class="bigNumber" id="eNBMI">–</div><h3>NBMI</h3><p class="note" id="eNBMINote">mm/day. Positive = basin injects moisture to atmosphere.</p></div>
-    <div class="feature"><div class="bigNumber" id="eConv">–</div><h3>Convergence</h3><p class="note" id="eConvNote">−∇·IVT, kg/m²/s.</p></div>
-    <div class="feature"><div class="bigNumber" id="eIVTmag">–</div><h3>Mean IVT</h3><p class="note" id="eIVTNote">kg/m/s, direction.</p></div>
-    <div class="feature"><div class="bigNumber" id="eStore">–</div><h3>Storage Δ</h3><p class="note" id="eStoreNote">d(TCWV)/dt rate.</p></div>
-  </div>
-
-  <!-- Three pump states explanation -->
-  <div class="heroGrid" style="margin-top:14px">
-    <div class="feature" style="border-color:#2d6b3f"><h3 style="color:#80ed99">🟢 Active Buffer</h3><p class="note">Intact forest. Deep roots access subsurface water. NBMI<sub>anom</sub> > 0 during dry/El Niño periods — forest <i>increases</i> pumping to stabilize flying rivers. Radiation-limited → water-limited transition with deep root hydraulic redistribution (Lee et al. 2005).</p></div>
-    <div class="feature" style="border-color:#6b5a2d"><h3 style="color:#f9c74f">🟡 Critical Threshold</h3><p class="note">Prolonged multiyear drought depletes deep soil water. Stomatal closure to prevent xylem embolism. NBMI<sub>anom</sub> flips from positive → strongly negative (Spanner et al. 2022).</p></div>
-    <div class="feature" style="border-color:#6b2d2d"><h3 style="color:#ff6b6b">🔴 Degraded</h3><p class="note">Deforested or pasture. Shallow roots only — no deep water access. NBMI collapses to zero during drought. Loses all capacity to feed flying rivers when the region needs it most (da Silva Dias).</p></div>
-  </div>
-
-  <div id="nbmiTimeline"></div>
-  <p class="note">Monthly NBMI timeline. Green = moisture injection (source), red = net precipitation (sink). Multi-year baseline enables NBMI<sub>anom</sub> = NBMI − NBMI<sub>clim</sub> for dry-season green-up detection.</p>
-
-  <!-- Evaporation source map -->
-  <div class="callout" style="margin-top:24px"><h2>Moisture Source Regions</h2><p class="note">Basins classified by NBMI above monthly baseline. Primary sources = consistently high moisture injection that sustains flying rivers.</p></div>
-  <div class="heroGrid">
-    <div class="feature"><div class="bigNumber" id="evNPrimary">–</div><h3>Primary Sources</h3><p class="note">>75th percentile NBMI bonus</p></div>
-    <div class="feature"><div class="bigNumber" id="evNSecondary">–</div><h3>Secondary Sources</h3><p class="note">>50th percentile NBMI bonus</p></div>
-    <div class="feature"><div class="bigNumber" id="evBaselineMin">–</div><h3>Baseline Min</h3><p class="note" id="evBaselineNote">10th percentile NBMI</p></div>
-    <div class="feature"><div class="bigNumber" id="evTopSource">–</div><h3>Top Source</h3><p class="note" id="evTopNote">Highest NBMI bonus</p></div>
-  </div>
-  <div id="evapMapContainer" style="height:400px;margin-top:16px;border-radius:14px;overflow:hidden"></div>
-  <div class="legend" style="position:static;margin-top:10px">
-    <div><span class="swatch" style="background:#ff6b6b;height:12px;width:12px;border-radius:3px"></span>Primary source</div>
-    <div><span class="swatch" style="background:#f9c74f;height:12px;width:12px;border-radius:3px"></span>Secondary source</div>
-    <div><span class="swatch" style="background:#93c5fd;height:12px;width:12px;border-radius:3px"></span>Contributor</div>
-    <div><span class="swatch" style="background:#1d4e89;height:12px;width:12px;border-radius:3px"></span>Minimal</div>
-  </div>
+<section id="budgetTab" class="tabPanel report">
+<div class="callout"><h2>NBMI — Net Basin Moisture Injection</h2><p class="note" id="budgetBasin">Select a basin in Map first.</p></div>
+<div class="heroGrid"><div class="feature"><div class="bigNumber" id="bNBMI">–</div><h3>NBMI mm/d</h3></div><div class="feature"><div class="bigNumber" id="bIVT">–</div><h3>IVT kg/m/s</h3><p class="note" id="bIVTDir"></p></div></div>
+<div id="budgetChart" style="height:300px"></div>
+<div class="heroGrid" style="margin-top:12px"><div class="feature" style="border-color:#2d6b3f"><h3 style="color:#80ed99">🟢 Active Buffer</h3><p class="note">Intact deep-root forest. NBMI rises during dry periods.</p></div><div class="feature" style="border-color:#6b5a2d"><h3 style="color:#f9c74f">🟡 Critical</h3><p class="note">Deep water depleted.</p></div><div class="feature" style="border-color:#6b2d2d"><h3 style="color:#ff6b6b">🔴 Degraded</h3><p class="note">No deep roots. Pump collapses.</p></div></div>
 </section>
 
-<!-- ═══════ TAB 3: METHODOLOGY ═══════ -->
 <section id="methodsTab" class="tabPanel report">
-  <div class="callout"><h2>ORBITA Methodology — Eulerian–Lagrangian Framework with Biotic Pumping Diagnostics</h2>
-    <p class="note">Scientific basis for moisture budget baseline calculation, Net Basin Moisture Injection (NBMI), dry-season green-up paradox detection, and ENSO anomaly attribution.</p>
-  </div>
-
-  <div class="methodGrid">
-    <div class="method"><h3>1. Eulerian Moisture Budget</h3>
-      <div class="eq">d(TCWV)/dt = E − P − ∇·(IVT)<br/>NBMI ≡ E − P = −Sink = ∇·(IVT) + d(TCWV)/dt</div>
-      <p class="note">NBMI = Net Basin Moisture Injection [mm/day]. Positive NBMI = basin exports moisture to the atmosphere (source for flying rivers). Negative NBMI = net precipitation sink. All terms area-averaged over HydroBASINS L6 polygons at 6-hourly ERA5 resolution.</p>
-    </div>
-
-    <div class="method"><h3>2. Divergence Theorem</h3>
-      <div class="eq">∬<sub>B</sub> ∇·(IVT) dA = ∮<sub>∂B</sub> (IVT · n̂) ds</div>
-      <p class="note">Area-integrated moisture flux divergence equals net lateral transport across the basin boundary. Positive convergence (−∇·IVT > 0) = net moisture influx from neighboring regions — the Eulerian signature of flying rivers.</p>
-    </div>
-
-    <div class="method"><h3>3. Baseline & Multiyear Climatology</h3>
-      <div class="eq">NBMI<sub>clim</sub>(B,m) = (1/N) Σ<sub>y</sub> NBMI(B,m,y)<br/>NBMI<sub>anom</sub>(B,m,y) = NBMI(B,m,y) − NBMI<sub>clim</sub>(B,m)</div>
-      <p class="note">For each basin B and calendar month m, the baseline is the multi-year mean NBMI. The anomaly NBMI<sub>anom</sub> reveals interannual variability including ENSO. Currently provisional with 8 months of 2023; full 2010–2024 archive enables robust climatology.</p>
-    </div>
-
-    <div class="method"><h3>4. Dry-Season Green-Up Paradox</h3>
-      <div class="eq">NBMI<sub>anom</sub> > 0 while P<sub>anom</sub> < 0</div>
-      <p class="note"><b>Key diagnostic signature.</b> Intact deep-rooted tropical forests exhibit <i>increased</i> transpiration during dry periods and moderate El Niño events — the opposite of what classic hydrology predicts. Documented by Myneni et al. (2007), Bonal et al. (2016), and Maeda et al. (2017). Three mechanisms drive this:</p>
-      <p class="note"><b>(a) Radiation limitation → water limitation transition.</b> Wet season cloud cover limits photosynthesis. Dry season clears clouds → massive spike in downward shortwave radiation R<sub>g</sub> → latent heat flux LE increases → accelerated transpiration (Bonal et al. 2016).</p>
-      <p class="note"><b>(b) Deep root subsidies and hydraulic redistribution.</b> Primary forest roots reach 10–18 m depth, accessing saturated layers inaccessible to shallow-rooted vegetation. At night, hydraulic redistribution (HR) lifts deep water to dry upper soil horizons via capillary action — boosting dry-season ET by up to 40% (Lee et al. 2005).</p>
-      <p class="note"><b>(c) Vapor Pressure Deficit (VPD) forcing.</b> El Niño drives up sensible heat → wider VPD → stronger physical "pull" on leaf water. As long as deep roots supply water to prevent xylem embolism, trees transpire heavily, thermoregulating the canopy.</p>
-    </div>
-
-    <div class="method"><h3>5. Three Pump States</h3>
-      <div class="eq">State = f(NBMI<sub>anom</sub>, forest_cover, drought_duration)</div>
-      <p class="note"><b>🟢 Active Buffer State:</b> NBMI<sub>anom</sub> > 0 during low-rainfall/high-heat periods. Intact forest configuration with deep root access. Basin acts as regional climate stabilizer, maintaining moisture supply to downwind Andes even when upstream inflow is dry.</p>
-      <p class="note"><b>🟡 Critical Water-Stress Threshold:</b> Multiyear mega-drought depletes deep soil water table. Stomatal closure to prevent catastrophic hydraulic failure. NBMI<sub>anom</sub> abruptly flips from strongly positive → deeply negative (Spanner et al. 2022).</p>
-      <p class="note"><b>🔴 Degraded/Deforested State:</b> Forest replaced by agriculture or pasture. Shallow roots only — no deep water access. NBMI collapses to zero during drought. Basin loses all capacity to feed flying rivers (da Silva Dias).</p>
-    </div>
-
-    <div class="method"><h3>6. ENSO Signal Detection</h3>
-      <div class="eq">Composite<sub>Niño</sub> = mean(NBMI<sub>anom</sub> | ONI ≥ +0.5)<br/>Composite<sub>Niña</sub> = mean(NBMI<sub>anom</sub> | ONI ≤ −0.5)</div>
-      <p class="note">Anomalies stratified by Oceanic Niño Index. Intact forest basins are expected to show NBMI<sub>anom</sub> > 0 (positive injection anomaly) during moderate El Niño — the active buffer response. Degraded basins show NBMI<sub>anom</sub> ≈ 0 or negative. Basin-level resolution maps which sub-basins are most ENSO-resilient.</p>
-    </div>
-
-    <div class="method"><h3>7. Lagrangian–Eulerian Integration</h3>
-      <p class="note">The Eulerian budget answers <i>how much</i> moisture enters/exits each basin. Lagrangian trajectories answer <i>where from</i> and <i>how long</i>. Together: (1) Lagrangian source regions cross-validated with Eulerian NBMI sources, (2) time-of-displacement constrains flux attribution window, (3) basin pairs with strong Lagrangian connection AND Eulerian moisture gradient = active flying-river corridors.</p>
-    </div>
-
-    <div class="method"><h3>8. Sub-Grid Ecohydrological Attribution</h3>
-      <div class="eq">Bonus(x,m) = NBMI(B,m) × W(x) / ΣW(x)<br/>W(x) = L(k) × Φ(Z)</div>
-      <p class="note">Distributed pixel-level weighting using ESA WorldCover LULC classes L(k) and elevation-dependent thermodynamic scaling Φ(Z) = exp(−γZ). Transitions from lumped basin allocation to sub-grid attribution. Captures deforestation impacts: if canopy → pasture, L(k) drops, reducing local moisture injection weight.</p>
-    </div>
-  </div>
-
-  <!-- References -->
-  <div class="callout" style="margin-top:24px"><h2>References</h2></div>
-  <div class="methodGrid">
-    <div class="ref"><b>Bonal et al. (2016)</b> — The response of tropical rainforests to drought. <i>Annals of Forest Science</i> 73(1), 27–44. <span style="color:var(--green)">263 citations</span></div>
-    <div class="ref"><b>Lee et al. (2005)</b> — Root functioning modifies seasonal climate. <i>PNAS</i> 102(49), 17576–17581. <span style="color:var(--green)">357 citations</span></div>
-    <div class="ref"><b>Maeda et al. (2017)</b> — Evapotranspiration seasonality across the Amazon basin. <i>Earth System Dynamics</i> 8(2), 439–454. <span style="color:var(--green)">128 citations</span></div>
-    <div class="ref"><b>Myneni et al. (2007)</b> — Large seasonal swings in leaf area of Amazon rainforests. <i>PNAS</i> 104(12), 4820–4823. <span style="color:var(--green)">506 citations</span></div>
-    <div class="ref"><b>Spanner et al. (2022)</b> — Dry Season Transpiration and Soil Water Dynamics in the Central Amazon. <i>Frontiers in Plant Science</i> 13, 825097. <span style="color:var(--green)">39 citations</span></div>
-    <div class="ref"><b>da Silva Dias</b> — Forest and Rainfall Interactions in the Amazon Basin. IGE Unicamp.</div>
-    <div class="ref"><b>van der Ent et al. (2010)</b> — WAM-2layers. <i>J. Hydrometeorology</i></div>
-    <div class="ref"><b>Drumond et al. (2014)</b> — Lagrangian moisture sources for South America. <i>J. Climate</i></div>
-    <div class="ref"><b>Arias et al. (2015)</b> — Colombian precipitation moisture sources. <i>Climate Dynamics</i></div>
-  </div>
+<div class="callout"><h2>Methodology</h2></div>
+<div class="methodGrid">
+<div class="method"><h3>Eulerian Budget</h3><div class="eq">NBMI ≡ E−P = ∇·IVT + d(TCWV)/dt</div><p class="note">Positive NBMI = basin injects moisture to atmosphere.</p></div>
+<div class="method"><h3>Dry-Season Green-Up</h3><div class="eq">NBMI<sub>anom</sub> &gt; 0 while P<sub>anom</sub> &lt; 0</div><p class="note">Intact deep-rooted forests increase transpiration during dry/El Niño periods (Lee 2005, Myneni 2007, Bonal 2016).</p></div>
+<div class="method"><h3>References</h3><p class="note">Bonal et al. (2016), Lee et al. (2005) PNAS 102, Maeda et al. (2017) ESD 8, Myneni et al. (2007) PNAS 104, Spanner et al. (2022), da Silva Dias.</p></div>
+</div>
 </section>
 
 <script>
-// ═══════ CORE ═══════════════════════════════════════════
-document.querySelectorAll('.tabBtn').forEach(btn=>btn.addEventListener('click',()=>{
-  document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tabPanel').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
-  var panel=document.getElementById(btn.dataset.tab);
-  panel.classList.add('active');
-  if(btn.dataset.tab==='mapExplorer'){setTimeout(()=>map.invalidateSize(),80)}
-  if(btn.dataset.tab==='eulerianTab'){setTimeout(()=>{if(!eBudget.loaded)loadEulerianBudgets().then(renderEulerian);else renderEulerian();if(evapMap)evapMap.invalidateSize();},150)}
-}));
+var MONTHS=['2023-01','2023-02','2023-03','2023-04','2023-05','2023-06','2023-07','2023-08','2023-09','2023-10','2023-11','2023-12'];
+var ASSET_BASE='https://storage.googleapis.com/orbita-platform-data/orinoquia/assets/';
+var S={basins:null,trajs:[],selBasin:null,selMonth:MONTHS[11],layers:{},map:null,budget:null};
+var _arr=['6060000200','6060000240','6060000250','6060000450','6060000460','6060000580','6060000740','6060001600','6060001910','6060001920','6060001940','6060001950','6060001970','6060001980','6060002270','6060002280','6060003210','6060003220','6060003680','6060003690','6060003730','6060004000','6060004010','6060004030','6060004040','6060004060','6060004070','6060004470','6060004480','6060004500','6060004510','6060004610','6060004630','6060033570','6060034060','6060041010','6060068100','6060068110','6060069430','6060069460','6060070260','6060070270','6060070330','6060070390','6060071120','6060071160','6060073070','6060073150','6060075000','6060075090','6060075390','6060075410','6060076610','6060076650','6060078120','6060078150','6060079250','6060079280','6060079310','6060079390','6060079860','6060079970','6060080920','6060081020','6060083060','6060083130','6060084040','6060084130','6060084190','6060084230','6060084380','6060084460','6060084750','6060084790','6060086300','6060086370','6060089660','6060089740','6060089780','6060089790','6060089850','6060089950','6060090230','6060090290','6060093530','6060093540','6060094680','6060094760','6060094950','6060094960','6060095530','6060095580','6060095840','6060095920','6060096010','6060096120','6060096310','6060096340','6060096500','6060096510','6060097230','6060097310','6060097370','6060097440','6060098330','6060098430','6060099400','6060099410','6060099440','6060099500','6060100890','6060100900','6060102740','6060102830','6060102920','6060102950','6060102960','6060104230','6060105580','6060105620','6060107870','6060107990','6060111430','6060111530','6060112920','6060113030','6060113570','6060113870','6060113940','6060115330','6060115340','6060117110','6060117150','6060117780','6060117840','6060118140','6060118200','6060118700','6060118710','6060120030','6060120040','6060120320','6060120370','6060122060','6060122070','6060123500','6060123510','6060124240','6060124370','6060126730','6060126850','6060129490','6060129500','6060129600','6060129810','6060130490','6060130600','6060130930','6060131030','6060132160','6060132240','6060134450','6060134460','6060134790','6060134890','6060136040','6060136120','6060136450','6060136480','6060137270','6060137380','6060140960','6060140970','6060143380','6060143540','6060150580','6060150590','6060152600','6060152610','6060153610','6060153670','6060154590','6060154700','6060156750','6060156880','6060159560','6060159570','6060160730','6060160900','6060163510','6060163520','6060167220','6060167330','6060169670','6060169680','6060171200','6060171210','6060180520','6060180640','6060187970','6060189860','6060189870','6060190720','6060190800','6060199150','6060199940','6060210920','6060211140','6060238550'];
+var ARRIVAL=new Set(_arr);
 
-const ORBITA_PARAMS=new URLSearchParams(window.location.search);
-let ORBITA_REGION=null, ORBITA_ASSET_BASE='';
-async function loadRegionConfig(){
-  let regions;
-  try{regions=await fetch('regions.json',{cache:'no-store'}).then(r=>r.json())}
-  catch(e){const fb=ORBITA_PARAMS.get('assetBase');if(fb)try{regions=await fetch(fb.replace(/\/?$/,'/')+'regions.json',{cache:'no-store'}).then(r=>r.json())}catch(e2){}}
-  if(!regions)regions={default_region:'orinoquia',regions:{orinoquia:{slug:'orinoquia',display_name:'Orinoquia–Andes',asset_base:'https://storage.googleapis.com/orbita-platform-data/orinoquia/',default_center:[4.7,-74.5],default_zoom:7}}};
-  var slug=ORBITA_PARAMS.get('region')||regions.default_region||'orinoquia';
-  ORBITA_REGION=regions.regions[slug]||Object.values(regions.regions)[0];
-  ORBITA_ASSET_BASE=(ORBITA_PARAMS.get('assetBase')||ORBITA_REGION.asset_base).replace(/\/?$/,'/');
-  document.getElementById('assetSourceNote').textContent=ORBITA_REGION.display_name+' | '+ORBITA_ASSET_BASE;
-  document.title='ORBITA – '+ORBITA_REGION.display_name;
-  return ORBITA_REGION;
+// Tabs
+document.querySelectorAll('.tabBtn').forEach(function(b){b.addEventListener('click',function(){
+  document.querySelectorAll('.tabBtn').forEach(function(x){x.classList.remove('active')});
+  document.querySelectorAll('.tabPanel').forEach(function(x){x.classList.remove('active')});
+  b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active');
+  if(b.dataset.tab==='mapTab')setTimeout(function(){S.map.invalidateSize()},100);
+  if(b.dataset.tab==='budgetTab')renderBudget();
+})});
+
+var ms=document.getElementById('monthSel');
+MONTHS.forEach(function(m,i){var o=document.createElement('option');o.value=m;o.textContent=m;if(i===11)o.selected=true;ms.appendChild(o)});
+ms.addEventListener('change',function(){S.selMonth=this.value});
+
+// Map
+function initMap(basins){
+S.map=L.map('map',{preferCanvas:true}).setView([5.5,-72],6);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy;CARTO',maxZoom:12}).addTo(S.map);
+S.layers.raw=L.layerGroup().addTo(S.map);
+S.layers.mean=L.layerGroup().addTo(S.map);
+S.layers.basins=L.geoJSON(basins,{style:function(f){
+  var id=String(f.properties.HYBAS_ID),sel=id===S.selBasin;
+  return{color:sel?'#f9c74f':'#67e8f9',weight:sel?3:2,fillColor:sel?'#f9c74f':'#164e63',fillOpacity:sel?.35:.18}
+},onEachFeature:function(f,l){
+  l.on('click',function(){S.selBasin=String(f.properties.HYBAS_ID);updateSelection();S.layers.basins.setStyle(function(f2){var i2=String(f2.properties.HYBAS_ID),s2=i2===S.selBasin;return{color:s2?'#f9c74f':'#67e8f9',weight:s2?3:2,fillColor:s2?'#f9c74f':'#164e63',fillOpacity:s2?.35:.18}})});
+  l.bindPopup((f.properties.display_name||('HB6_'+f.properties.HYBAS_ID))+'<br>Area: '+Number(f.properties.SUB_AREA||0).toFixed(0)+' km²');
+}}).addTo(S.map);
+S.map.fitBounds(S.layers.basins.getBounds(),{padding:[20,20]});
 }
-function assetUrl(name){return ORBITA_ASSET_BASE+'assets/'+name}
-async function fetchTextAsset(name){var r=await fetch(assetUrl(name),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.text()}
-async function fetchJsonAsset(name){var r=await fetch(assetUrl(name),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+function updateSelection(){
+if(!S.selBasin){document.getElementById('selName').textContent='No basin selected';document.getElementById('loadBtn').disabled=true;return}
+var feat=findBasinFeature(S.selBasin);
+document.getElementById('selName').textContent=feat?(feat.properties.display_name||('HB6_'+S.selBasin)):('HB6_'+S.selBasin);
+document.getElementById('loadBtn').disabled=false;
+}
+function findBasinFeature(id){return S.basins?S.basins.features.find(function(f){return String(f.properties.HYBAS_ID)===id}):null}
 
-// ═══════ STATE ═══════════════════════════════════════════
-const state={basins:null,trajectories:[],basinOptions:[],months:[],monthDates:[],selectedBasin:null,
-  layers:{basins:null,raw:L.layerGroup(),mean:L.layerGroup(),arrows:L.layerGroup(),markers:L.layerGroup()}};
-let map;
-
-(async function init(){
-  var region=await loadRegionConfig();
-  map=L.map('map',{preferCanvas:true}).setView(region.default_center||[4.7,-74.5],region.default_zoom||7);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; CARTO',maxZoom:12}).addTo(map);
-  state.layers.raw.addTo(map);state.layers.mean.addTo(map);state.layers.arrows.addTo(map);state.layers.markers.addTo(map);
-
-function toNum(x){if(x===null||x===undefined)return null;if(typeof x==='string'&&(x.trim()===''||x.trim().toLowerCase()==='none'||x.trim().toLowerCase()==='nan'))return null;var v=Number(x);return Number.isFinite(v)?v:null}
-function basinId(x){var v=toNum(x);return v==null?null:String(Math.trunc(v))}
-function styleBasin(f){var id=String(f.properties.HYBAS_ID),sel=id===state.selectedBasin,arrival=state.basinOptions.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===id);return{color:sel?'#f9c74f':arrival?'#67e8f9':'#1d4e89',weight:sel?3:arrival?2:1,fillColor:sel?'#f9c74f':arrival?'#164e63':'#12385a',fillOpacity:sel?.32:arrival?.18:.055}}
-function selectedMonth(){return state.months[Number(document.getElementById('monthSlider').value)]}
-function selectedDate(){return state.monthDates[Number(document.getElementById('dateSlider').value)]}
-function dateWindow(){var d=new Date(selectedDate()),m=d.getMonth(),y=d.getFullYear(),first=new Date(y,m,1),start=new Date(d);start.setDate(start.getDate()-Number(document.getElementById('lookbackSlider').value)+1);if(start<first)start.setTime(first.getTime());var end=new Date(d);end.setDate(end.getDate()+Number(document.getElementById('lookaheadSlider').value));return{start:start,end:end}}
-function setMonthDates(){var m=selectedMonth();state.monthDates=[...new Set(state.trajectories.filter(r=>r.month===m).map(r=>r.release_date))].sort();var ds=document.getElementById('dateSlider');ds.max=Math.max(0,state.monthDates.length-1);ds.value=state.monthDates.length-1;document.getElementById('monthLabel').textContent=m||'no month';clampLookback();document.getElementById('lookaheadSlider').disabled=false;document.getElementById('lookaheadLabel').textContent='+'+document.getElementById('lookaheadSlider').value+' days forward'}
-function clampLookback(){if(!state.monthDates.length)return;var lk=document.getElementById('lookbackSlider');if(!lk)return;var selD=new Date(state.monthDates[Number(document.getElementById('dateSlider').value)]||state.monthDates[state.monthDates.length-1]),firstD=new Date(state.monthDates[0]),maxLb=Math.max(0,Math.ceil((selD-firstD)/86400000));if(Number(lk.value)>maxLb)lk.value=maxLb;lk.max=Math.max(1,maxLb);document.getElementById('lookbackLabel').textContent=lk.value+' days (within month)'}
-function windowRows(){if(!state.selectedBasin)return[];var w=dateWindow();return state.trajectories.filter(r=>{var rd=new Date(r.release_date);return rd>=w.start&&rd<=w.end&&String(basinId(r.arrival_HYBAS_ID))===state.selectedBasin})}
+// Helpers
 function distKm(a,b){var R=6371,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180,la1=a.lat*Math.PI/180,la2=b.lat*Math.PI/180,h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 function bearing(a,b){var y=Math.sin((b.lon-a.lon)*Math.PI/180)*Math.cos(b.lat*Math.PI/180),x=Math.cos(a.lat*Math.PI/180)*Math.sin(b.lat*Math.PI/180)-Math.sin(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.cos((b.lon-a.lon)*Math.PI/180);return(Math.atan2(y,x)*180/Math.PI+360)%360}
-function addArrow(a,b,raw){var mid=[(a.lat+b.lat)/2,(a.lon+b.lon)/2],deg=bearing(a,b)-90,html='<div class="'+(raw?'rawArrow':'arrowIcon')+'" style="transform:rotate('+deg+'deg)">➤</div>';L.marker(mid,{interactive:false,icon:L.divIcon({className:'',html:html,iconSize:[18,18],iconAnchor:[9,9]})}).addTo(state.layers.arrows)}
-function hasVolume(rows){return rows.some(r=>toNum(r.transport_volume_m3)!=null||toNum(r.uptake_volume_m3)!=null)}
-function rowVolume(r){return toNum(r.transport_volume_m3)??toNum(r.uptake_volume_m3)??0}
-function fmtM3(v){if(v==null||!Number.isFinite(v))return'pending';if(Math.abs(v)>=1e9)return(v/1e9).toFixed(2)+'B m³';if(Math.abs(v)>=1e6)return(v/1e6).toFixed(2)+'M m³';return v.toFixed(0)+' m³'}
+function addArrow(a,b,raw){var mid=[(a.lat+b.lat)/2,(a.lon+b.lon)/2],deg=bearing(a,b)-90,c=raw?"#c7f9ff":"#67e8f9",o=raw?".45":"1",s=raw?"13px":"18px";var el=L.divIcon({className:raw?"rawArrow":"arrowIcon",html:"➤",iconSize:[18,18],iconAnchor:[9,9]});var mk=L.marker(mid,{interactive:false,icon:el});var ic=el.options.iconSize;var el2=document.createElement("div");el2.style.cssText="transform:rotate("+deg+"deg);display:inline-block;color:"+c+";opacity:"+o+";font-size:"+s;el2.textContent="➤";mk.setIcon(L.divIcon({className:"",html:el2.outerHTML,iconSize:[18,18],iconAnchor:[9,9]}));mk.addTo(raw?S.layers.raw:S.layers.mean)}
 
-function draw(){
-  state.layers.raw.clearLayers();state.layers.mean.clearLayers();state.layers.arrows.clearLayers();state.layers.markers.clearLayers();
-  if(state.layers.basins)state.layers.basins.setStyle(styleBasin);
-  document.getElementById('dateLabel').textContent=(selectedDate()||'no date')+' selected';
-  document.getElementById('lookbackLabel').textContent=document.getElementById('lookbackSlider').value+' days (within month)';
-  document.getElementById('lookaheadLabel').textContent='+'+document.getElementById('lookaheadSlider').value+' days forward';
-  var rows=windowRows();
-  if(!rows.length){
-    var isArr=state.basinOptions.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===state.selectedBasin);
-    document.getElementById('statusNote').className='note warning';
-    document.getElementById('statusNote').textContent=isArr?'No trajectories match this window. Try wider lookback or different month.':'This basin has no trajectory data. Select a ★-marked basin.';
-    document.getElementById('nTraj').textContent='0';document.getElementById('nPts').textContent='0';
-    document.getElementById('meanDisp').textContent='–';document.getElementById('absVol').textContent='–';document.getElementById('relVol').textContent='–';
-    updateCharts([],[]);return;
-  }
-  var byTraj={};rows.forEach(r=>{if(!byTraj[r.trajectory_id])byTraj[r.trajectory_id]=[];byTraj[r.trajectory_id].push(r)});
-  Object.values(byTraj).forEach(path=>{
-    path.sort((a,b)=>Number(b.hour_back)-Number(a.hour_back));
-    var coords=path.map(r=>[Number(r.lat),Number(r.lon)]).filter(c=>Number.isFinite(c[0])&&Number.isFinite(c[1]));
-    if(coords.length>1){L.polyline(coords,{color:'#c7f9ff',weight:1,opacity:.14}).addTo(state.layers.raw);var mid=Math.floor((path.length-1)/2);if(path[mid+1])addArrow({lat:Number(path[mid].lat),lon:Number(path[mid].lon)},{lat:Number(path[mid+1].lat),lon:Number(path[mid+1].lon)},true)}
-  });
-  // Pre-computed mean path (from mean_paths.json)
-  var mpKey = state.selectedBasin + ':' + selectedMonth();
-  var prePath = state.meanPaths[mpKey];
-  if (prePath && prePath.length > 1) {
-    for (var i = 1; i < prePath.length; i++) {
-      var p0 = prePath[i-1], p1 = prePath[i];
-      var w = Math.max(2, Math.min(12, 2 + (p1.n || 1) * 0.3));
-      L.polyline([[p0.lat, p0.lon], [p1.lat, p1.lon]], {
-        color: '#67e8f9', weight: w, opacity: .94, lineCap: 'round'
-      }).bindTooltip(p0.h + '→' + p1.h + ' h | n=' + p1.n + ' | disp=' + (p1.disp||0).toFixed(1) + ' km')
-        .addTo(state.layers.mean);
-      addArrow(p0, p1, false);
-    }
-    var origin = prePath[0], arr = prePath[prePath.length-1];
-    L.circleMarker([origin.lat, origin.lon], {radius: 5, color: '#93c5fd', fillOpacity: .9})
-      .bindTooltip('source position').addTo(state.layers.markers);
-    L.circleMarker([arr.lat, arr.lon], {radius: 6, color: '#80ed99', fillOpacity: .95})
-      .bindTooltip('arrival (0 h)').addTo(state.layers.markers);
-    // Agreement stats from pre-computed path
-    var aggr = prePath.map(function(p) { return {h: p.h, disp: p.disp || 0, n: p.n || 0}; });
-  } else {
-    // Fallback: compute from raw data
-    var byHour = {}; rows.forEach(function(r) {
-      var h = Number(r.hour_back); if (!byHour[h]) byHour[h] = [];
-      byHour[h].push({lat: Number(r.lat), lon: Number(r.lon)});
-    });
-    var meanPts = [], aggr = [];
-    Object.keys(byHour).map(Number).sort(function(a,b){return b-a}).forEach(function(h) {
-      var pts = byHour[h].filter(function(p){return Number.isFinite(p.lat) && Number.isFinite(p.lon)});
-      if (!pts.length) return;
-      var mean = {lat: pts.reduce(function(s,p){return s+p.lat},0)/pts.length,
-                  lon: pts.reduce(function(s,p){return s+p.lon},0)/pts.length};
-      var disp = pts.length>1 ? pts.reduce(function(s,p){return s+distKm(p,mean)},0)/pts.length : 0;
-      meanPts.push({lat: mean.lat, lon: mean.lon, h: h, disp: disp, n: pts.length});
-      aggr.push({h: h, disp: disp, n: pts.length});
-    });
-    for (var i = 1; i < meanPts.length; i++) {
-      var p0 = meanPts[i-1], p1 = meanPts[i];
-      var w = Math.max(2, Math.min(12, 2 + p1.n * 2.3));
-      L.polyline([[p0.lat, p0.lon], [p1.lat, p1.lon]], {
-        color: '#67e8f9', weight: w, opacity: .94, lineCap: 'round'
-      }).bindTooltip(p0.h + '→' + p1.h + ' h | n=' + p1.n + ' | disp=' + p1.disp.toFixed(1) + ' km')
-        .addTo(state.layers.mean);
-      addArrow(p0, p1, false);
-    }
-    if (meanPts.length) {
-      var origin = meanPts[0], arr = meanPts[meanPts.length-1];
-      L.circleMarker([origin.lat, origin.lon], {radius: 5, color: '#93c5fd', fillOpacity: .9})
-        .bindTooltip('source position').addTo(state.layers.markers);
-      L.circleMarker([arr.lat, arr.lon], {radius: 6, color: '#80ed99', fillOpacity: .95})
-        .bindTooltip('arrival (0 h)').addTo(state.layers.markers);
-    }
-  }
-  updateStats(rows, Object.keys(byTraj).length, aggr); updateCharts(rows, aggr);
-}
-function updateStats(rows,ntraj,agreement){
-  document.getElementById('nTraj').textContent=ntraj;document.getElementById('nPts').textContent=rows.length;
-  var md=agreement.length?agreement.reduce((s,d)=>s+d.disp,0)/agreement.length:null;
-  document.getElementById('meanDisp').textContent=md==null?'–':md.toFixed(1)+' km';
-  var real=hasVolume(rows),volumes=rows.filter(r=>Number(r.hour_back)===0).map(rowVolume).filter(v=>v>0),avg=volumes.length?volumes.reduce((s,v)=>s+v,0)/volumes.length:null;
-  document.getElementById('absVol').textContent=real?fmtM3(avg):'pending';
-  document.getElementById('relVol').textContent=real?'100%':'proxy';
-  var feat=state.basins?.features?.find(f=>String(f.properties.HYBAS_ID)===state.selectedBasin);
-  document.getElementById('basinArea').textContent=feat&&feat.properties.SUB_AREA?Number(feat.properties.SUB_AREA).toFixed(0)+' km²':'–';
-  document.getElementById('selectedBasinName').textContent=feat?(feat.properties.display_name||feat.properties.name):'No basin selected';
-  document.getElementById('statusNote').className='note '+(real?'ok':'warning');
-  document.getElementById('statusNote').textContent=real?'Physical transported-volume columns active.':'Path-contact proxy — production moisture engine pending.';
-}
-function updateCharts(rows,agreement){
-  Plotly.react('agreementChart',[{x:agreement.map(d=>d.h),y:agreement.map(d=>d.disp),type:'scatter',mode:'lines+markers',line:{color:'#67e8f9'},marker:{color:'#f9c74f'},name:'disp km'}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:42,r:10,t:10,b:35},xaxis:{title:'hours backward',autorange:'reversed'},yaxis:{title:'km'}},{displayModeBar:false});
-  var real=hasVolume(rows),agg={};rows.forEach(r=>{var id=basinId(r.HYBAS_ID)||'ocean';agg[id]=(agg[id]||0)+(real?rowVolume(r):1)});
-  var items=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,10),total=items.reduce((s,d)=>s+d[1],0)||1;
-  Plotly.react('contribChart',[{x:items.map(d=>100*d[1]/total),y:items.map(d=>d[0]==='ocean'?d[0]:'HB6_'+d[0]),type:'bar',orientation:'h',marker:{color:real?'#80ed99':'#93c5fd'}}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:112,r:10,t:10,b:35},xaxis:{title:real?'% volume':'% proxy'},yaxis:{autorange:'reversed'}},{displayModeBar:false});
+// Load & Draw
+async function loadAndDraw(){
+if(!S.selBasin)return;
+var btn=document.getElementById('loadBtn');btn.disabled=true;btn.textContent='Loading...';
+document.getElementById('loadStatus').textContent='Fetching '+S.selMonth+'...';
+try{
+var fn='trajectories_'+S.selMonth.replace('-','')+'.csv.gz';
+var r=await fetch(ASSET_BASE+fn,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);
+var t=await r.text();
+var parsed=Papa.parse(t,{header:true,dynamicTyping:false});
+var ta={};
+parsed.data.forEach(function(r){if(Number(r.hour_back)===0){var id=r.HYBAS_ID||'';if(!id&&r.target){var m=r.target.match(/HB6_(\d+)/);if(m)id=m[1]}if(id)ta[r.trajectory_id]=String(Math.trunc(Number(id)))}});
+parsed.data.forEach(function(r){r.aid=ta[r.trajectory_id]||''});
+S.trajs=parsed.data.filter(function(r){return r.lat&&r.lon&&r.aid===S.selBasin});
+drawTrajs();
+btn.textContent='Load Trajectories';btn.disabled=false;
+document.getElementById('loadStatus').textContent=S.trajs.length+' points for '+S.selMonth;
+}catch(e){document.getElementById('loadStatus').textContent='Error: '+e.message;btn.textContent='Retry';btn.disabled=false}
 }
 
-// ═══════ LAZY MONTHLY DATA LOADING ═══════════════════════
-state.meanPaths={};state.arrivalCounts={};state.monthlyTraj={};state.currentMonth=null;
-
-async function loadMonthlyTraj(ym){
-  if(state.monthlyTraj[ym]) return state.monthlyTraj[ym];
-  var fn='trajectories_'+ym.replace('-','')+'.csv.gz';
-  try{
-    var t=await fetchTextAsset(fn);
-    var parsed=Papa.parse(t,{header:true,dynamicTyping:false});
-    state.monthlyTraj[ym]=parsed.data.filter(function(r){return r.lat&&r.lon});
-    return state.monthlyTraj[ym];
-  }catch(e){console.warn('Failed to load '+fn+':',e.message);return[];}
-}
-
-function switchMonth(){
-  var m=selectedMonth(); if(!m||m===state.currentMonth) return;
-  state.currentMonth=m;
-  loadMonthlyTraj(m).then(function(traj){
-    state.trajectories=traj;
-    setMonthDates(); draw();
-  });
-}
-
-// Startup: load GeoJSON + arrival counts + mean paths (small, fast)
-Promise.all([
-  fetchJsonAsset('orinoco_l6_basins_simplified.geojson'),
-  fetchJsonAsset('basin_arrival_counts.json?v=2').catch(function(){return {};}),
-  fetchJsonAsset('mean_paths.json').catch(function(){return {};})
-]).then(function(r){
-  var basins=r[0]; state.arrivalCounts=r[1]; state.meanPaths=r[2];
-  state.basins=basins;
-  state.months=['2023-01','2023-02','2023-03','2023-04','2023-05','2023-06','2023-07','2023-08','2023-09','2023-10','2023-11','2023-12'];
-  var ms=document.getElementById('monthSlider');ms.max=state.months.length-1;ms.value=state.months.length-1;
-  var bs=document.getElementById('basinSelect');
-  basins.features.sort(function(a,b){return String(a.properties.HYBAS_ID).localeCompare(String(b.properties.HYBAS_ID))}).forEach(function(f){
-    var o=document.createElement('option');o.value=String(f.properties.HYBAS_ID);
-    var isArr=state.arrivalCounts[String(f.properties.HYBAS_ID)]>0;
-    if(isArr){if(!state.basinOptions)state.basinOptions=[];state.basinOptions.push({arrival_HYBAS_ID:String(f.properties.HYBAS_ID)});}
-    o.textContent=(isArr?'★ ':'')+(f.properties.display_name||('HB6_'+o.value));bs.appendChild(o);
-  });
-  if(state.basinOptions&&state.basinOptions.length){state.selectedBasin=state.basinOptions[0].arrival_HYBAS_ID;bs.value=state.selectedBasin}
-  state.layers.basins=L.geoJSON(basins,{style:styleBasin,onEachFeature:function(f,l){
-    var isArr=state.arrivalCounts[String(f.properties.HYBAS_ID)]>0;
-    l.on('click',function(){state.selectedBasin=String(f.properties.HYBAS_ID);bs.value=state.selectedBasin;draw()});
-    l.bindPopup('<b>'+(f.properties.display_name||('HB6_'+f.properties.HYBAS_ID))+'</b><br/>HydroBASINS L6<br/>Area: '+Number(f.properties.SUB_AREA||0).toFixed(0)+' km²<br/>'+(isArr?'★ Trajectory data available':'No trajectory data')+'<br/>Click = select arrival basin.');
-  }}).addTo(map);
-  map.fitBounds(state.layers.basins.getBounds(),{padding:[20,20]});
-  ms.addEventListener('input',function(){switchMonth()});
-  document.getElementById('dateSlider').addEventListener('input',function(){clampLookback();draw()});
-  document.getElementById('lookbackSlider').addEventListener('input',function(){clampLookback();draw()});
-  document.getElementById('lookaheadSlider').addEventListener('input',draw);
-  bs.addEventListener('change',function(e){state.selectedBasin=e.target.value||null;draw()});
-  switchMonth();
+function drawTrajs(){
+S.layers.raw.clearLayers();S.layers.mean.clearLayers();
+if(!S.trajs.length){document.getElementById('nTraj').textContent='0';document.getElementById('nPts').textContent='0';document.getElementById('nDisp').textContent='–';Plotly.purge('sourceChart');return}
+var byTraj={};S.trajs.forEach(function(r){if(!byTraj[r.trajectory_id])byTraj[r.trajectory_id]=[];byTraj[r.trajectory_id].push(r)});
+var trajIds=Object.keys(byTraj);
+trajIds.forEach(function(tid){
+  var path=byTraj[tid];path.sort(function(a,b){return Number(b.hour_back)-Number(a.hour_back)});
+  var coords=path.map(function(r){return[Number(r.lat),Number(r.lon)]}).filter(function(c){return isFinite(c[0])&&isFinite(c[1])});
+  if(coords.length>1){L.polyline(coords,{color:'#c7f9ff',weight:1,opacity:.12}).addTo(S.layers.raw);
+    var mid=Math.floor((path.length-1)/2);if(path[mid+1])addArrow({lat:Number(path[mid].lat),lon:Number(path[mid].lon)},{lat:Number(path[mid+1].lat),lon:Number(path[mid+1].lon)},true)}
 });
-
-// ═══════ EULERIAN BUDGET (NBMI) ═════════════════════════
-var eBudget={data:null,loaded:false};
-async function loadEulerianBudgets(){
-  if(eBudget.loaded)return;
-  try{
-    var csvText=await fetchTextAsset('basin_budgets.csv');
-    var parsed=Papa.parse(csvText,{header:true,dynamicTyping:false}),lookup={};
-    parsed.data.filter(function(r){return r.hybas_id}).forEach(function(r){
-      var h=String(Math.trunc(Number(r.hybas_id)));if(!lookup[h])lookup[h]=[];
-      lookup[h].push({month:r.month,nbmi_mm_day:-Number(r.sink_mm_day),
-        convergence_kg_s:Number(r.convergence_kg_s),ivt_magnitude_kg_ms:Number(r.ivt_magnitude_kg_ms),
-        ivt_direction_deg:Number(r.ivt_direction_deg),evap_mm_day:Number(r.evap_mm_day),
-        precip_mm_day:Number(r.precip_mm_day),sink_rate_kg_s:Number(r.sink_rate_kg_s)});
-    });
-    Object.keys(lookup).forEach(function(h){lookup[h].sort(function(a,b){return a.month.localeCompare(b.month)})});
-    eBudget.data=lookup;eBudget.loaded=true;
-  }catch(e){console.warn('Eulerian load failed:',e.message)}
-}
-function classifyPumpState(months){
-  if(!months||!months.length)return{state:'unknown',label:'No data',cls:'',detail:''};
-  var nbmiValues=months.map(function(m){return m.nbmi_mm_day});
-  var meanNBMI=nbmiValues.reduce(function(s,v){return s+v},0)/nbmiValues.length;
-  var positiveMonths=nbmiValues.filter(function(v){return v>0}).length;
-  var ratio=positiveMonths/nbmiValues.length;
-  if(meanNBMI>5&&ratio>0.7)return{state:'active',label:'🟢 Active Buffer',cls:'pumpActive',detail:'Strong NBMI signal. Basin consistently injects moisture. Deep-root forest configuration likely intact.'};
-  if(meanNBMI>0&&ratio>0.4)return{state:'moderate',label:'🟢 Moderate Source',cls:'pumpActive',detail:'Net moisture injection in '+Math.round(ratio*100)+'% of months. Seasonal pumping active.'};
-  if(meanNBMI<-5)return{state:'sink',label:'🔴 Net Sink',cls:'pumpDegraded',detail:'Basin is a net precipitation sink. Low or absent moisture injection.'};
-  if(meanNBMI<0)return{state:'weak',label:'🟡 Weak Source',cls:'pumpCritical',detail:'Marginal net injection. May be near critical threshold or seasonally variable.'};
-  return{state:'moderate',label:'🟢 Moderate Source',cls:'pumpActive',detail:'Net moisture injection active.'};
-}
-function renderEulerian(){
-  if(!eBudget.loaded){loadEulerianBudgets().then(renderEulerian);return;}
-  if(!state.selectedBasin)return;
-  var months=eBudget.data[state.selectedBasin];
-  var feat=state.basins&&state.basins.features?state.basins.features.find(function(f){return String(f.properties.HYBAS_ID)===state.selectedBasin}):null;
-  var name=feat?(feat.properties.display_name||('HB6_'+feat.properties.HYBAS_ID)):'Basin '+state.selectedBasin;
-  if(!months||!months.length){document.getElementById('eNBMI').textContent='no data';return;}
-  var m=months[months.length-1];
-  // NBMI = -Sink (positive = moisture injection)
-  var nbmi=m.nbmi_mm_day;
-  document.getElementById('eNBMI').textContent=nbmi.toFixed(2)+' mm/d';
-  document.getElementById('eNBMINote').textContent=nbmi>=0?'Net moisture injection (source for flying rivers). '+name:'Net precipitation sink. '+name;
-  document.getElementById('eConv').textContent=(m.convergence_kg_s*1e6).toFixed(2)+' μg/m²/s';
-  document.getElementById('eConvNote').textContent='−∇·IVT convergence';
-  document.getElementById('eIVTmag').textContent=m.ivt_magnitude_kg_ms.toFixed(0)+' kg/m/s';
-  document.getElementById('eIVTNote').textContent='Direction: '+m.ivt_direction_deg.toFixed(0)+'°';
-  document.getElementById('eStore').textContent=(m.sink_rate_kg_s-m.convergence_kg_s>=0?'+':'')+((m.sink_rate_kg_s-m.convergence_kg_s)*1e6).toFixed(3)+' μg/m²/s';
-  document.getElementById('eStoreNote').textContent='d(TCWV)/dt rate';
-  // Pump state
-  var pump=classifyPumpState(months);
-  var badge=document.getElementById('pumpStateBadge');
-  badge.textContent=pump.label;badge.className='pumpState '+pump.cls;
-  document.getElementById('pumpStateDetail').textContent=pump.detail;
-  // NBMI timeline
-  var trace={x:months.map(function(d){return d.month}),y:months.map(function(d){return d.nbmi_mm_day}),
-    type:'bar',marker:{color:months.map(function(d){return d.nbmi_mm_day>=0?'#80ed99':'#ff6b6b'})},name:'NBMI mm/day'};
-  Plotly.react('nbmiTimeline',[trace],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:50,r:10,t:10,b:40},xaxis:{title:'Month'},yaxis:{title:'NBMI mm/day',zeroline:true,zerolinecolor:'#3a5a8c'}},{displayModeBar:false});
-  // Also render evap sources
-  if(!evapData)loadEvapSources().then(renderEvapSources);
+var byHour={},srcCount={};S.trajs.forEach(function(r){var h=Number(r.hour_back);if(!byHour[h])byHour[h]=[];byHour[h].push({lat:Number(r.lat),lon:Number(r.lon)});var hid=String(Math.trunc(Number(r.HYBAS_ID)));if(hid&&hid!=='NaN'&&hid!==S.selBasin)srcCount[hid]=(srcCount[hid]||0)+1});
+var hrs=Object.keys(byHour).map(Number).sort(function(a,b){return b-a}),meanPts=[],aggr=[];
+hrs.forEach(function(h){var pts=byHour[h].filter(function(p){return isFinite(p.lat)&&isFinite(p.lon)});if(!pts.length)return;var m={lat:pts.reduce(function(s,p){return s+p.lat},0)/pts.length,lon:pts.reduce(function(s,p){return s+p.lon},0)/pts.length};var d=pts.length>1?pts.reduce(function(s,p){return s+distKm(p,m)},0)/pts.length:0;meanPts.push({lat:m.lat,lon:m.lon,h:h,n:pts.length,disp:d});aggr.push({h:h,disp:d,n:pts.length})});
+for(var i=1;i<meanPts.length;i++){var p0=meanPts[i-1],p1=meanPts[i],w=Math.max(2,Math.min(10,2+p1.n*0.3));L.polyline([[p0.lat,p0.lon],[p1.lat,p1.lon]],{color:'#67e8f9',weight:w,opacity:.9}).bindTooltip(p0.h+'→'+p1.h+'h n='+p1.n).addTo(S.layers.mean);addArrow(p0,p1,false)}
+document.getElementById('nTraj').textContent=trajIds.length;document.getElementById('nPts').textContent=S.trajs.length;
+var md=aggr.length?aggr.reduce(function(s,d){return s+d.disp},0)/aggr.length:0;document.getElementById('nDisp').textContent=md.toFixed(1)+' km';
+var nbmi=S.budget||{},si=Object.entries(srcCount).map(function(e){var n=nbmi[e[0]+':'+S.selMonth]||0;return{id:e[0],n:e[1],nbmi:n,score:e[1]*(1+Math.max(0,n))}});si.sort(function(a,b){return b.score-a.score});si=si.slice(0,10);
+Plotly.react('sourceChart',[{x:si.map(function(d){return d.score}),y:si.map(function(d){return'HB6_'+d.id}),type:'bar',orientation:'h',marker:{color:si.map(function(d){return d.nbmi>=0?'#80ed99':'#ff6b6b'})}}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff',size:11},margin:{l:85,r:10,t:5,b:25},xaxis:{title:'NBMI-weighted contact'},yaxis:{autorange:'reversed'}},{displayModeBar:false});
 }
 
-// ═══════ EVAP SOURCES MAP ════════════════════════════════
-var evapMap=null,evapLayer=null,evapData=null;
-async function loadEvapSources(){
-  if(evapData)return;
-  try{
-    var geo=await fetchJsonAsset('evaporation_sources.geojson');
-    var csvText=await fetchTextAsset('basin_evaporation_sources.csv');
-    var parsed=Papa.parse(csvText,{header:true,dynamicTyping:false});
-    evapData={geo:geo,stats:parsed.data.filter(function(r){return r.hybas_id})};
-  }catch(e){console.warn('Evap load failed:',e.message)}
+// Budget
+async function renderBudget(){
+if(!S.selBasin)return;
+document.getElementById('budgetBasin').textContent='Basin: HB6_'+S.selBasin;
+try{
+var r=await fetch(ASSET_BASE+'basin_budgets.csv',{cache:'no-store'});var t=await r.text();
+var rows=Papa.parse(t,{header:true}).data.filter(function(r){return String(Math.trunc(Number(r.hybas_id)))===S.selBasin});
+if(!rows.length){document.getElementById('bNBMI').textContent='no data';return}
+rows.sort(function(a,b){return a.month.localeCompare(b.month)});
+var last=rows[rows.length-1],nbmi=-Number(last.sink_mm_day);
+document.getElementById('bNBMI').textContent=nbmi.toFixed(2)+' mm/d';
+document.getElementById('bIVT').textContent=Number(last.ivt_magnitude_kg_ms).toFixed(0)+' kg/m/s';
+document.getElementById('bIVTDir').textContent='Dir: '+Number(last.ivt_direction_deg).toFixed(0)+'°';
+Plotly.react('budgetChart',[{x:rows.map(function(d){return d.month}),y:rows.map(function(d){return -Number(d.sink_mm_day)}),type:'bar',marker:{color:rows.map(function(d){return -Number(d.sink_mm_day)>=0?'#80ed99':'#ff6b6b'})},name:'NBMI'}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:50,r:10,t:10,b:40},xaxis:{title:'Month'},yaxis:{title:'NBMI mm/d',zeroline:true,zerolinecolor:'#3a5a8c'}},{displayModeBar:false});
+}catch(e){document.getElementById('bNBMI').textContent='error'}
 }
-function renderEvapSources(){
-  if(!evapData){loadEvapSources().then(renderEvapSources);return;}
-  if(!evapMap){
-    evapMap=L.map('evapMapContainer',{preferCanvas:true,zoomControl:true}).setView([5.5,-72],6);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; CARTO',maxZoom:12}).addTo(evapMap);
-    setTimeout(function(){evapMap.invalidateSize()},100);
-  }
-  if(evapLayer)evapMap.removeLayer(evapLayer);
-  evapLayer=L.geoJSON(evapData.geo,{style:function(f){return{color:f.properties.fill_color||'#1d4e89',weight:1,fillColor:f.properties.fill_color||'#1d4e89',fillOpacity:f.properties.fill_opacity||0.08}},onEachFeature:function(f,l){var p=f.properties;l.bindPopup('<b>HB6_'+p.HYBAS_ID+'</b><br/>Class: <b>'+p.source_class+'</b><br/>NBMI bonus: '+(p.mean_bonus?Number(p.mean_bonus).toFixed(3):'N/A')+' mm/d<br/>Mean export: '+(p.mean_evap?Number(p.mean_evap).toFixed(3):'N/A')+' mm/d');}}).addTo(evapMap);
-  var stats=evapData.stats,primary=stats.filter(function(r){return r.source_class==='primary_source'}),secondary=stats.filter(function(r){return r.source_class==='secondary_source'});
-  document.getElementById('evNPrimary').textContent=primary.length;
-  document.getElementById('evNSecondary').textContent=secondary.length;
-  var bonuses=stats.map(function(r){return Number(r.mean_bonus)||0}).filter(function(v){return v>0});
-  document.getElementById('evBaselineMin').textContent=bonuses.length?Math.min.apply(null,bonuses).toFixed(3):'–';
-  var top=bonuses.length?stats.reduce(function(a,b){return(Number(a.mean_bonus)||0)>(Number(b.mean_bonus)||0)?a:b}):null;
-  document.getElementById('evTopSource').textContent=top?'HB6_'+top.hybas_id:'–';
-  document.getElementById('evTopNote').textContent=top?(Number(top.mean_bonus)||0).toFixed(3)+' mm/d NBMI bonus':'No data';
-}
-})();
+
+// Startup
+Promise.all([fetch(ASSET_BASE+'orinoco_l6_basins_simplified.geojson',{cache:'no-store'}).then(function(r){return r.json()}),fetch(ASSET_BASE+'basin_budgets.csv',{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){var d=Papa.parse(t,{header:true}).data,l={};d.forEach(function(r){if(r.hybas_id)l[String(Math.trunc(Number(r.hybas_id)))+':'+r.month]=-Number(r.sink_mm_day)});return l}).catch(function(){return{}})]).then(function(r){S.basins=r[0];S.budget=r[1];initMap(S.basins);updateSelection()}).catch(function(e){console.error(e)});
 </script>
 </body>
 </html>
