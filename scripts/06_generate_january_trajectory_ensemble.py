@@ -37,6 +37,18 @@ TARGETS = {
 }
 
 
+def load_basin_targets():
+    """Load all HydroBASINS L6 basin centroids as release points."""
+    gpkg = ROOT / "data/hydrobasins/orinoco_l6_basins.gpkg"
+    gdf = gpd.read_file(gpkg)
+    targets = {}
+    for _, row in gdf.iterrows():
+        c = row.geometry.centroid
+        hybas = str(int(row["HYBAS_ID"]))
+        targets[f"HB6_{hybas}"] = {"lat": c.y, "lon": c.x}
+    return targets
+
+
 @dataclass
 class WindSample:
     u: float
@@ -176,6 +188,7 @@ def generate(
     step_hours: int,
     year: int = 2023,
     month: int = 1,
+    targets: dict | None = None,
 ) -> pd.DataFrame:
     ds = open_pressure_month(year, month)
     sampler = TimeWindSampler(ds)
@@ -185,8 +198,10 @@ def generate(
     hour_marks = list(range(0, hours_back + 1, step_hours))
     if hour_marks[-1] != hours_back:
         hour_marks.append(hours_back)
+    if targets is None:
+        targets = TARGETS
     for release_time in tqdm(releases, desc="release times"):
-        for target, loc in TARGETS.items():
+        for target, loc in targets.items():
             for level in levels:
                 lat, lon = loc["lat"], loc["lon"]
                 tid = f"{target}_{release_time:%Y%m%dT%H}_{level}hpa"
@@ -231,6 +246,8 @@ def main() -> None:
     ap.add_argument("--release-freq", default="6h")
     ap.add_argument("--levels", default="850,700,500")
     ap.add_argument("--out-prefix", default=None, help="Output basename without extension")
+    ap.add_argument("--release-from", default="targets", choices=["targets", "basins"],
+                    help="targets = Bogotá+Manizales (default); basins = all L6 centroids")
     args = ap.parse_args()
 
     if args.start is None:
@@ -240,6 +257,14 @@ def main() -> None:
         next_month = month_start + pd.offsets.MonthBegin(1)
         args.end = f"{(next_month - pd.Timedelta(days=1)):%Y-%m-%d} 18:00"
 
+    if args.release_from == "basins":
+        targets = load_basin_targets()
+        if args.release_freq == "6h":
+            args.release_freq = "1d"  # throttle for all-basin mode
+        print(f"Release-from basins: {len(targets)} points, freq={args.release_freq}")
+    else:
+        targets = None
+
     levels = [int(x) for x in args.levels.split(",") if x.strip()]
     out_dir = ROOT / "results" / "tables"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -247,7 +272,7 @@ def main() -> None:
     out_csv = out_dir / f"{out_prefix}.csv"
     out_parquet = out_dir / f"{out_prefix}.parquet"
 
-    df = generate(args.start, args.end, levels, args.hours_back, args.release_freq, args.step_hours, args.year, args.month)
+    df = generate(args.start, args.end, levels, args.hours_back, args.release_freq, args.step_hours, args.year, args.month, targets)
     df.to_csv(out_csv, index=False)
     df.to_parquet(out_parquet, index=False)
     summary = {

@@ -49,3 +49,4 @@ __pycache__/
 *.log
 *.tmp
 .cache/
+results/trajectory_platform/assets/trajectories_platform_current.csv

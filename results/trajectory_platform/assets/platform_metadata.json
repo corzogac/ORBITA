@@ -1,8 +1,8 @@
 {
   "platform_status": "basin-arrival L6 platform; physical volume activates when transport_volume_m3 or uptake_volume_m3 exists",
   "trajectory_source": "results/tables/trajectory_ensemble_2023_available_2d_rk4.parquet",
-  "n_trajectories": 5832,
-  "n_points": 71904,
+  "n_trajectories": 146529,
+  "n_points": 1758333,
   "dates_available": [
     "2023-01-01",
     "2023-01-02",
@@ -258,7 +258,7 @@
     "2023-07",
     "2023-08"
   ],
-  "arrival_basins_available": 2,
+  "arrival_basins_available": 195,
   "basins_available": 201,
   "basin_level": "HydroBASINS level 6",
   "has_physical_volume_m3": false,
