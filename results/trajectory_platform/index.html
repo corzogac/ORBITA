@@ -335,17 +335,60 @@ function draw(){
     var coords=path.map(r=>[Number(r.lat),Number(r.lon)]).filter(c=>Number.isFinite(c[0])&&Number.isFinite(c[1]));
     if(coords.length>1){L.polyline(coords,{color:'#c7f9ff',weight:1,opacity:.14}).addTo(state.layers.raw);var mid=Math.floor((path.length-1)/2);if(path[mid+1])addArrow({lat:Number(path[mid].lat),lon:Number(path[mid].lon)},{lat:Number(path[mid+1].lat),lon:Number(path[mid+1].lon)},true)}
   });
-  var byHour={};rows.forEach(r=>{var h=Number(r.hour_back);if(!byHour[h])byHour[h]=[];byHour[h].push({lat:Number(r.lat),lon:Number(r.lon)})});
-  var meanPts=[],agreement=[];
-  Object.keys(byHour).map(Number).sort((a,b)=>b-a).forEach(h=>{
-    var pts=byHour[h].filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));if(!pts.length)return;
-    var mean={lat:pts.reduce((s,p)=>s+p.lat,0)/pts.length,lon:pts.reduce((s,p)=>s+p.lon,0)/pts.length};
-    var disp=pts.length>1?pts.reduce((s,p)=>s+distKm(p,mean),0)/pts.length:0,score=pts.length/(1+disp/25);
-    meanPts.push({...mean,h:h,disp:disp,n:pts.length,score:score});agreement.push({h:h,disp:disp,n:pts.length,score:score});
-  });
-  for(var i=1;i<meanPts.length;i++){var p0=meanPts[i-1],p1=meanPts[i],w=Math.max(2,Math.min(12,2+p1.score*2.3));L.polyline([[p0.lat,p0.lon],[p1.lat,p1.lon]],{color:'#67e8f9',weight:w,opacity:.94,lineCap:'round'}).bindTooltip(p0.h+'→'+p1.h+' h | n='+p1.n+' | disp='+p1.disp.toFixed(1)+' km').addTo(state.layers.mean);addArrow(p0,p1,false)}
-  if(meanPts.length){var origin=meanPts[0],arr=meanPts[meanPts.length-1];L.circleMarker([origin.lat,origin.lon],{radius:5,color:'#93c5fd',fillOpacity:.9}).bindTooltip('source position').addTo(state.layers.markers);L.circleMarker([arr.lat,arr.lon],{radius:6,color:'#80ed99',fillOpacity:.95}).bindTooltip('arrival (0 h)').addTo(state.layers.markers)}
-  updateStats(rows,Object.keys(byTraj).length,agreement);updateCharts(rows,agreement);
+  // Pre-computed mean path (from mean_paths.json)
+  var mpKey = state.selectedBasin + ':' + selectedMonth();
+  var prePath = state.meanPaths[mpKey];
+  if (prePath && prePath.length > 1) {
+    for (var i = 1; i < prePath.length; i++) {
+      var p0 = prePath[i-1], p1 = prePath[i];
+      var w = Math.max(2, Math.min(12, 2 + (p1.n || 1) * 0.3));
+      L.polyline([[p0.lat, p0.lon], [p1.lat, p1.lon]], {
+        color: '#67e8f9', weight: w, opacity: .94, lineCap: 'round'
+      }).bindTooltip(p0.h + '→' + p1.h + ' h | n=' + p1.n + ' | disp=' + (p1.disp||0).toFixed(1) + ' km')
+        .addTo(state.layers.mean);
+      addArrow(p0, p1, false);
+    }
+    var origin = prePath[0], arr = prePath[prePath.length-1];
+    L.circleMarker([origin.lat, origin.lon], {radius: 5, color: '#93c5fd', fillOpacity: .9})
+      .bindTooltip('source position').addTo(state.layers.markers);
+    L.circleMarker([arr.lat, arr.lon], {radius: 6, color: '#80ed99', fillOpacity: .95})
+      .bindTooltip('arrival (0 h)').addTo(state.layers.markers);
+    // Agreement stats from pre-computed path
+    var aggr = prePath.map(function(p) { return {h: p.h, disp: p.disp || 0, n: p.n || 0}; });
+  } else {
+    // Fallback: compute from raw data
+    var byHour = {}; rows.forEach(function(r) {
+      var h = Number(r.hour_back); if (!byHour[h]) byHour[h] = [];
+      byHour[h].push({lat: Number(r.lat), lon: Number(r.lon)});
+    });
+    var meanPts = [], aggr = [];
+    Object.keys(byHour).map(Number).sort(function(a,b){return b-a}).forEach(function(h) {
+      var pts = byHour[h].filter(function(p){return Number.isFinite(p.lat) && Number.isFinite(p.lon)});
+      if (!pts.length) return;
+      var mean = {lat: pts.reduce(function(s,p){return s+p.lat},0)/pts.length,
+                  lon: pts.reduce(function(s,p){return s+p.lon},0)/pts.length};
+      var disp = pts.length>1 ? pts.reduce(function(s,p){return s+distKm(p,mean)},0)/pts.length : 0;
+      meanPts.push({lat: mean.lat, lon: mean.lon, h: h, disp: disp, n: pts.length});
+      aggr.push({h: h, disp: disp, n: pts.length});
+    });
+    for (var i = 1; i < meanPts.length; i++) {
+      var p0 = meanPts[i-1], p1 = meanPts[i];
+      var w = Math.max(2, Math.min(12, 2 + p1.n * 2.3));
+      L.polyline([[p0.lat, p0.lon], [p1.lat, p1.lon]], {
+        color: '#67e8f9', weight: w, opacity: .94, lineCap: 'round'
+      }).bindTooltip(p0.h + '→' + p1.h + ' h | n=' + p1.n + ' | disp=' + p1.disp.toFixed(1) + ' km')
+        .addTo(state.layers.mean);
+      addArrow(p0, p1, false);
+    }
+    if (meanPts.length) {
+      var origin = meanPts[0], arr = meanPts[meanPts.length-1];
+      L.circleMarker([origin.lat, origin.lon], {radius: 5, color: '#93c5fd', fillOpacity: .9})
+        .bindTooltip('source position').addTo(state.layers.markers);
+      L.circleMarker([arr.lat, arr.lon], {radius: 6, color: '#80ed99', fillOpacity: .95})
+        .bindTooltip('arrival (0 h)').addTo(state.layers.markers);
+    }
+  }
+  updateStats(rows, Object.keys(byTraj).length, aggr); updateCharts(rows, aggr);
 }
 function updateStats(rows,ntraj,agreement){
   document.getElementById('nTraj').textContent=ntraj;document.getElementById('nPts').textContent=rows.length;
@@ -367,35 +410,59 @@ function updateCharts(rows,agreement){
   Plotly.react('contribChart',[{x:items.map(d=>100*d[1]/total),y:items.map(d=>d[0]==='ocean'?d[0]:'HB6_'+d[0]),type:'bar',orientation:'h',marker:{color:real?'#80ed99':'#93c5fd'}}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:112,r:10,t:10,b:35},xaxis:{title:real?'% volume':'% proxy'},yaxis:{autorange:'reversed'}},{displayModeBar:false});
 }
 
-// ═══════ DATA LOADING ════════════════════════════════════
+// ═══════ LAZY MONTHLY DATA LOADING ═══════════════════════
+state.meanPaths={};state.arrivalCounts={};state.monthlyTraj={};state.currentMonth=null;
+
+async function loadMonthlyTraj(ym){
+  if(state.monthlyTraj[ym]) return state.monthlyTraj[ym];
+  var fn='trajectories_'+ym.replace('-','')+'.csv.gz';
+  try{
+    var t=await fetchTextAsset(fn);
+    var parsed=Papa.parse(t,{header:true,dynamicTyping:false});
+    state.monthlyTraj[ym]=parsed.data.filter(function(r){return r.lat&&r.lon});
+    return state.monthlyTraj[ym];
+  }catch(e){console.warn('Failed to load '+fn+':',e.message);return[];}
+}
+
+function switchMonth(){
+  var m=selectedMonth(); if(!m||m===state.currentMonth) return;
+  state.currentMonth=m;
+  loadMonthlyTraj(m).then(function(traj){
+    state.trajectories=traj;
+    setMonthDates(); draw();
+  });
+}
+
+// Startup: load GeoJSON + arrival counts + mean paths (small, fast)
 Promise.all([
   fetchJsonAsset('orinoco_l6_basins_simplified.geojson'),
-  fetchTextAsset('trajectories_platform_current.csv').then(t=>Papa.parse(t,{header:true,dynamicTyping:false}).data.filter(r=>r.lat&&r.lon)),
-  fetchTextAsset('arrival_basin_options.csv').then(t=>Papa.parse(t,{header:true,dynamicTyping:false}).data.filter(r=>r.arrival_HYBAS_ID))
-]).then(([basins,traj,opts])=>{
-  state.basins=basins;state.trajectories=traj;state.basinOptions=opts;
-  state.months=[...new Set(traj.map(r=>r.month||String(r.release_date).slice(0,7)))].sort();
-  var ms=document.getElementById('monthSlider');ms.max=Math.max(0,state.months.length-1);ms.value=state.months.length-1;
+  fetchJsonAsset('basin_arrival_counts.json?v=2').catch(function(){return {};}),
+  fetchJsonAsset('mean_paths.json').catch(function(){return {};})
+]).then(function(r){
+  var basins=r[0]; state.arrivalCounts=r[1]; state.meanPaths=r[2];
+  state.basins=basins;
+  state.months=['2023-01','2023-02','2023-03','2023-04','2023-05','2023-06','2023-07','2023-08','2023-09','2023-10','2023-11','2023-12'];
+  var ms=document.getElementById('monthSlider');ms.max=state.months.length-1;ms.value=state.months.length-1;
   var bs=document.getElementById('basinSelect');
-  basins.features.sort((a,b)=>String(a.properties.HYBAS_ID).localeCompare(String(b.properties.HYBAS_ID))).forEach(f=>{
+  basins.features.sort(function(a,b){return String(a.properties.HYBAS_ID).localeCompare(String(b.properties.HYBAS_ID))}).forEach(function(f){
     var o=document.createElement('option');o.value=String(f.properties.HYBAS_ID);
-    var isArr=opts.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===o.value);
+    var isArr=state.arrivalCounts[String(f.properties.HYBAS_ID)]>0;
+    if(isArr){if(!state.basinOptions)state.basinOptions=[];state.basinOptions.push({arrival_HYBAS_ID:String(f.properties.HYBAS_ID)});}
     o.textContent=(isArr?'★ ':'')+(f.properties.display_name||('HB6_'+o.value));bs.appendChild(o);
   });
-  if(opts.length){state.selectedBasin=String(Math.trunc(Number(opts[0].arrival_HYBAS_ID)));bs.value=state.selectedBasin}
-  setMonthDates();
-  state.layers.basins=L.geoJSON(basins,{style:styleBasin,onEachFeature:(f,l)=>{
-    var isArr=state.basinOptions.some(b=>String(Math.trunc(Number(b.arrival_HYBAS_ID)))===String(f.properties.HYBAS_ID));
-    l.on('click',()=>{state.selectedBasin=String(f.properties.HYBAS_ID);bs.value=state.selectedBasin;draw()});
+  if(state.basinOptions&&state.basinOptions.length){state.selectedBasin=state.basinOptions[0].arrival_HYBAS_ID;bs.value=state.selectedBasin}
+  state.layers.basins=L.geoJSON(basins,{style:styleBasin,onEachFeature:function(f,l){
+    var isArr=state.arrivalCounts[String(f.properties.HYBAS_ID)]>0;
+    l.on('click',function(){state.selectedBasin=String(f.properties.HYBAS_ID);bs.value=state.selectedBasin;draw()});
     l.bindPopup('<b>'+(f.properties.display_name||('HB6_'+f.properties.HYBAS_ID))+'</b><br/>HydroBASINS L6<br/>Area: '+Number(f.properties.SUB_AREA||0).toFixed(0)+' km²<br/>'+(isArr?'★ Trajectory data available':'No trajectory data')+'<br/>Click = select arrival basin.');
   }}).addTo(map);
   map.fitBounds(state.layers.basins.getBounds(),{padding:[20,20]});
-  ms.addEventListener('input',()=>{setMonthDates();draw()});
-  document.getElementById('dateSlider').addEventListener('input',()=>{clampLookback();draw()});
-  document.getElementById('lookbackSlider').addEventListener('input',()=>{clampLookback();draw()});
+  ms.addEventListener('input',function(){switchMonth()});
+  document.getElementById('dateSlider').addEventListener('input',function(){clampLookback();draw()});
+  document.getElementById('lookbackSlider').addEventListener('input',function(){clampLookback();draw()});
   document.getElementById('lookaheadSlider').addEventListener('input',draw);
-  bs.addEventListener('change',e=>{state.selectedBasin=e.target.value||null;draw()});
-  draw();
+  bs.addEventListener('change',function(e){state.selectedBasin=e.target.value||null;draw()});
+  switchMonth();
 });
 
 // ═══════ EULERIAN BUDGET (NBMI) ═════════════════════════

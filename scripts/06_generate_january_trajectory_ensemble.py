@@ -164,7 +164,7 @@ def open_pressure_month(year: int, month: int) -> xr.Dataset:
 
 
 def tag_basins(points: pd.DataFrame) -> pd.DataFrame:
-    basin_path = ROOT / "data" / "hydrobasins" / "orinoco_l5_basins.gpkg"
+    basin_path = ROOT / "data" / "hydrobasins" / "orinoco_l6_basins.gpkg"
     basins = gpd.read_file(basin_path)
     if basins.crs is None:
         basins = basins.set_crs("EPSG:4326")

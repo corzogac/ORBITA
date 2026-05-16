@@ -52,3 +52,4 @@ __pycache__/
 results/trajectory_platform/assets/trajectories_platform_current.csv
 results/trajectory_platform/assets/trajectories_platform_current.csv.gz
 results/trajectory_platform/assets/trajectories_platform_current.csv*
+results/trajectory_platform/assets/trajectories_*.csv.gz
