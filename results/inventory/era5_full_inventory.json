@@ -1,0 +1,693 @@
+{
+  "generated_utc": "2026-05-16T08:37:41.024041Z",
+  "sources": {
+    "gc_sdd1_raw": {
+      "root": "/Volumes/GC_SDD1/ncdata/era5_sa",
+      "type": "raw_6hourly",
+      "files": [
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_q_202301.nc",
+          "variable": "q",
+          "year_month": "202301",
+          "size_mb": 601.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_q_202302.nc",
+          "variable": "q",
+          "year_month": "202302",
+          "size_mb": 558.4
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_q_202303.nc",
+          "variable": "q",
+          "year_month": "202303",
+          "size_mb": 611.0
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_q_202304.nc",
+          "variable": "q",
+          "year_month": "202304",
+          "size_mb": 608.1
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_q_202305.nc",
+          "variable": "q",
+          "year_month": "202305",
+          "size_mb": 597.4
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_q_202306.nc",
+          "variable": "q",
+          "year_month": "202306",
+          "size_mb": 570.0
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_q_202307.nc",
+          "variable": "q",
+          "year_month": "202307",
+          "size_mb": 563.4
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_q_202308.nc",
+          "variable": "q",
+          "year_month": "202308",
+          "size_mb": 570.5
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_q_202309.nc",
+          "variable": "q",
+          "year_month": "202309",
+          "size_mb": 584.0
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_q_202310.nc",
+          "variable": "q",
+          "year_month": "202310",
+          "size_mb": 599.8
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_t_202301.nc",
+          "variable": "t",
+          "year_month": "202301",
+          "size_mb": 517.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_t_202302.nc",
+          "variable": "t",
+          "year_month": "202302",
+          "size_mb": 487.9
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_t_202303.nc",
+          "variable": "t",
+          "year_month": "202303",
+          "size_mb": 521.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_t_202304.nc",
+          "variable": "t",
+          "year_month": "202304",
+          "size_mb": 529.9
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_t_202305.nc",
+          "variable": "t",
+          "year_month": "202305",
+          "size_mb": 514.5
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_t_202306.nc",
+          "variable": "t",
+          "year_month": "202306",
+          "size_mb": 519.5
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_t_202307.nc",
+          "variable": "t",
+          "year_month": "202307",
+          "size_mb": 516.4
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_t_202308.nc",
+          "variable": "t",
+          "year_month": "202308",
+          "size_mb": 533.5
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_t_202309.nc",
+          "variable": "t",
+          "year_month": "202309",
+          "size_mb": 523.8
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_t_202310.nc",
+          "variable": "t",
+          "year_month": "202310",
+          "size_mb": 518.9
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202301.nc",
+          "variable": "u",
+          "year_month": "202301",
+          "size_mb": 646.8
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202302.nc",
+          "variable": "u",
+          "year_month": "202302",
+          "size_mb": 582.9
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202303.nc",
+          "variable": "u",
+          "year_month": "202303",
+          "size_mb": 664.1
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202304.nc",
+          "variable": "u",
+          "year_month": "202304",
+          "size_mb": 621.3
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202305.nc",
+          "variable": "u",
+          "year_month": "202305",
+          "size_mb": 641.4
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202306.nc",
+          "variable": "u",
+          "year_month": "202306",
+          "size_mb": 641.4
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202307.nc",
+          "variable": "u",
+          "year_month": "202307",
+          "size_mb": 636.7
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202308.nc",
+          "variable": "u",
+          "year_month": "202308",
+          "size_mb": 631.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202309.nc",
+          "variable": "u",
+          "year_month": "202309",
+          "size_mb": 627.8
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202310.nc",
+          "variable": "u",
+          "year_month": "202310",
+          "size_mb": 665.6
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_u_202311.nc",
+          "variable": "u",
+          "year_month": "202311",
+          "size_mb": 636.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_v_202301.nc",
+          "variable": "v",
+          "year_month": "202301",
+          "size_mb": 677.4
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_v_202302.nc",
+          "variable": "v",
+          "year_month": "202302",
+          "size_mb": 635.5
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_v_202303.nc",
+          "variable": "v",
+          "year_month": "202303",
+          "size_mb": 706.0
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_v_202304.nc",
+          "variable": "v",
+          "year_month": "202304",
+          "size_mb": 696.8
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_v_202305.nc",
+          "variable": "v",
+          "year_month": "202305",
+          "size_mb": 702.5
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_v_202306.nc",
+          "variable": "v",
+          "year_month": "202306",
+          "size_mb": 699.5
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_v_202307.nc",
+          "variable": "v",
+          "year_month": "202307",
+          "size_mb": 702.9
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_v_202308.nc",
+          "variable": "v",
+          "year_month": "202308",
+          "size_mb": 691.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_v_202309.nc",
+          "variable": "v",
+          "year_month": "202309",
+          "size_mb": 680.7
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_v_202310.nc",
+          "variable": "v",
+          "year_month": "202310",
+          "size_mb": 690.5
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_w_202301.nc",
+          "variable": "w",
+          "year_month": "202301",
+          "size_mb": 738.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_w_202302.nc",
+          "variable": "w",
+          "year_month": "202302",
+          "size_mb": 684.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_w_202303.nc",
+          "variable": "w",
+          "year_month": "202303",
+          "size_mb": 752.0
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_w_202304.nc",
+          "variable": "w",
+          "year_month": "202304",
+          "size_mb": 738.4
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_w_202305.nc",
+          "variable": "w",
+          "year_month": "202305",
+          "size_mb": 750.1
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_w_202306.nc",
+          "variable": "w",
+          "year_month": "202306",
+          "size_mb": 710.8
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_w_202307.nc",
+          "variable": "w",
+          "year_month": "202307",
+          "size_mb": 730.8
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_w_202308.nc",
+          "variable": "w",
+          "year_month": "202308",
+          "size_mb": 722.0
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_w_202309.nc",
+          "variable": "w",
+          "year_month": "202309",
+          "size_mb": 721.8
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_w_202310.nc",
+          "variable": "w",
+          "year_month": "202310",
+          "size_mb": 737.7
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_z_202301.nc",
+          "variable": "z",
+          "year_month": "202301",
+          "size_mb": 440.3
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_z_202302.nc",
+          "variable": "z",
+          "year_month": "202302",
+          "size_mb": 408.4
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_z_202303.nc",
+          "variable": "z",
+          "year_month": "202303",
+          "size_mb": 462.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_z_202304.nc",
+          "variable": "z",
+          "year_month": "202304",
+          "size_mb": 442.0
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_z_202305.nc",
+          "variable": "z",
+          "year_month": "202305",
+          "size_mb": 443.6
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_z_202306.nc",
+          "variable": "z",
+          "year_month": "202306",
+          "size_mb": 433.4
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_z_202307.nc",
+          "variable": "z",
+          "year_month": "202307",
+          "size_mb": 443.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_z_202308.nc",
+          "variable": "z",
+          "year_month": "202308",
+          "size_mb": 437.2
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_z_202309.nc",
+          "variable": "z",
+          "year_month": "202309",
+          "size_mb": 446.5
+        },
+        {
+          "path": "pressure_levels/2023/era5_sa_pl_z_202310.nc",
+          "variable": "z",
+          "year_month": "202310",
+          "size_mb": 448.8
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_accum_202301.nc",
+          "variable": "accum",
+          "year_month": "202301",
+          "size_mb": 26.2
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_accum_202302.nc",
+          "variable": "accum",
+          "year_month": "202302",
+          "size_mb": 23.8
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_accum_202303.nc",
+          "variable": "accum",
+          "year_month": "202303",
+          "size_mb": 26.1
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_accum_202304.nc",
+          "variable": "accum",
+          "year_month": "202304",
+          "size_mb": 25.2
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_accum_202305.nc",
+          "variable": "accum",
+          "year_month": "202305",
+          "size_mb": 25.8
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_accum_202306.nc",
+          "variable": "accum",
+          "year_month": "202306",
+          "size_mb": 24.6
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_accum_202307.nc",
+          "variable": "accum",
+          "year_month": "202307",
+          "size_mb": 25.3
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_accum_202308.nc",
+          "variable": "accum",
+          "year_month": "202308",
+          "size_mb": 24.8
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_accum_202309.nc",
+          "variable": "accum",
+          "year_month": "202309",
+          "size_mb": 24.2
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_accum_202310.nc",
+          "variable": "accum",
+          "year_month": "202310",
+          "size_mb": 25.0
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_instant_202301.nc",
+          "variable": "instant",
+          "year_month": "202301",
+          "size_mb": 223.8
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_instant_202302.nc",
+          "variable": "instant",
+          "year_month": "202302",
+          "size_mb": 201.6
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_instant_202303.nc",
+          "variable": "instant",
+          "year_month": "202303",
+          "size_mb": 223.9
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_instant_202304.nc",
+          "variable": "instant",
+          "year_month": "202304",
+          "size_mb": 216.1
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_instant_202305.nc",
+          "variable": "instant",
+          "year_month": "202305",
+          "size_mb": 221.2
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_instant_202306.nc",
+          "variable": "instant",
+          "year_month": "202306",
+          "size_mb": 214.0
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_instant_202307.nc",
+          "variable": "instant",
+          "year_month": "202307",
+          "size_mb": 221.3
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_instant_202308.nc",
+          "variable": "instant",
+          "year_month": "202308",
+          "size_mb": 220.5
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_instant_202309.nc",
+          "variable": "instant",
+          "year_month": "202309",
+          "size_mb": 214.5
+        },
+        {
+          "path": "surface/2023/era5_sa_sfc_instant_202310.nc",
+          "variable": "instant",
+          "year_month": "202310",
+          "size_mb": 222.3
+        }
+      ],
+      "total_gb": 39.0,
+      "n_files": 81,
+      "months": [
+        "202301",
+        "202302",
+        "202303",
+        "202304",
+        "202305",
+        "202306",
+        "202307",
+        "202308",
+        "202309",
+        "202310",
+        "202311"
+      ],
+      "year_range": "2023-2023"
+    },
+    "extreme_ssd_processed": {
+      "root": "/Volumes/Extreme SSD/Work/ERA5",
+      "type": "processed_monthly_lagrangian_static",
+      "datasets": {
+        "monthly_ivt_divergence": {
+          "file": "VIDMF_VIEF_VIM_monthly.nc",
+          "size_mb": 1143.1,
+          "time_start": "1959-01-01",
+          "time_end": "2026-02-01",
+          "n_timesteps": 844,
+          "variables": [
+            "p84.162",
+            "p71.162",
+            "p72.162",
+            "vimd"
+          ]
+        },
+        "monthly_epq": {
+          "file": "E_PET_Q_monthly.nc",
+          "size_mb": 818.7,
+          "time_start": "1959-01-01",
+          "time_end": "2026-02-01",
+          "n_timesteps": 806,
+          "variables": [
+            "e",
+            "pev",
+            "sro"
+          ]
+        },
+        "monthly_uv10": {
+          "file": "UV_10_monthly.nc",
+          "size_mb": 545.8,
+          "time_start": "1959-01-01",
+          "time_end": "2026-02-01",
+          "n_timesteps": 806,
+          "variables": [
+            "u10",
+            "v10"
+          ]
+        },
+        "monthly_sa": {
+          "file": "ERA5_MonthlySA.nc",
+          "size_mb": 388.8,
+          "time_start": "2001-01-01",
+          "time_end": "2021-12-01",
+          "n_timesteps": 36,
+          "variables": [
+            "u10",
+            "v10",
+            "d2m",
+            "evaow",
+            "evatc",
+            "evavt",
+            "lai_hv",
+            "lai_lv",
+            "pev",
+            "ro"
+          ]
+        },
+        "monthly_average": {
+          "file": "Monthly_average1.nc",
+          "size_mb": 1221.7,
+          "time_start": "1940-01-01",
+          "time_end": "2024-05-01",
+          "n_timesteps": 1013,
+          "variables": [
+            "u10",
+            "v10",
+            "t2m",
+            "cp",
+            "e",
+            "lai_hv",
+            "lai_lv",
+            "mer",
+            "pev",
+            "ro"
+          ]
+        },
+        "tp_t2m_yearly": {
+          "file": "tp_t2m_2023_2026.nc",
+          "size_mb": 10.3,
+          "time_start": "2023-01-01",
+          "time_end": "2026-02-01",
+          "n_timesteps": 76,
+          "variables": [
+            "tp",
+            "t2m"
+          ]
+        },
+        "lagrangian": {
+          "n_files": 38,
+          "first": "lagrangian_2023_01.nc",
+          "last": "lagrangian_2026_02.nc",
+          "total_size_mb": 47012.8,
+          "variables": [
+            "u",
+            "v",
+            "w",
+            "q"
+          ],
+          "dims": {
+            "time": 744,
+            "pressure_level": 9,
+            "latitude": 149,
+            "longitude": 143
+          }
+        },
+        "static_elevation": {
+          "file": "dem_south_america.nc",
+          "size_mb": 0.7
+        },
+        "static_landcover": {
+          "file": "landcover_south_america.nc",
+          "size_mb": 2.4
+        },
+        "static_orography": {
+          "file": "downloads/orography_invariant.nc",
+          "size_mb": 0.3
+        },
+        "static_vegetation": {
+          "file": "downloads/vegetation_invariant.nc",
+          "size_mb": 0.7
+        },
+        "yearly_ivt": {
+          "n_files": 4,
+          "files": [
+            "ivt_2023.nc",
+            "ivt_2024.nc",
+            "ivt_2025.nc",
+            "ivt_2026.nc"
+          ],
+          "total_size_mb": 24.5
+        },
+        "yearly_epq": {
+          "n_files": 4,
+          "files": [
+            "epq_2023.nc",
+            "epq_2024.nc",
+            "epq_2025.nc",
+            "epq_2026.nc"
+          ],
+          "total_size_mb": 10.3
+        },
+        "yearly_uv10": {
+          "n_files": 4,
+          "files": [
+            "uv10_2023.nc",
+            "uv10_2024.nc",
+            "uv10_2025.nc",
+            "uv10_2026.nc"
+          ],
+          "total_size_mb": 13.0
+        },
+        "yearly_tp_t2m": {
+          "n_files": 4,
+          "files": [
+            "tp_t2m_2023.nc",
+            "tp_t2m_2024.nc",
+            "tp_t2m_2025.nc",
+            "tp_t2m_2026.nc"
+          ],
+          "total_size_mb": 9.8
+        }
+      },
+      "total_gb": 51.2
+    }
+  },
+  "gcs": {
+    "bucket": "rs-weather-data-orbit",
+    "raw_months_on_gcs": [],
+    "n_raw_months": 0
+  },
+  "summary": {
+    "total_local_gb": 90.2,
+    "raw_6hourly_months": 11,
+    "raw_6hourly_year_range": "2023-2023",
+    "monthly_climatology_range": "1959-2026",
+    "lagrangian_files": 38,
+    "has_elevation": true,
+    "has_landcover": true
+  }
+}
