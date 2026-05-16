@@ -46,6 +46,7 @@ button:disabled{opacity:.4;cursor:default}
 <button class="tabBtn active" data-tab="mapTab">1. Map</button>
 <button class="tabBtn" data-tab="budgetTab">2. Budget</button>
 <button class="tabBtn" data-tab="methodsTab">3. Methods</button>
+<button class="tabBtn" data-tab="reportTab">4. Report</button>
 </nav>
 </header>
 
@@ -75,6 +76,27 @@ button:disabled{opacity:.4;cursor:default}
 <div class="method"><h3>References</h3><p class="note">Bonal et al. (2016), Lee et al. (2005) PNAS 102, Maeda et al. (2017) ESD 8, Myneni et al. (2007) PNAS 104, Spanner et al. (2022), da Silva Dias.</p></div>
 </div>
 </section>
+
+<section id="reportTab" class="tabPanel">
+<div id="reportContent" style="padding:24px;max-width:900px;margin:0 auto;background:#fff;color:#111;min-height:100vh;font-family:Georgia,serif">
+<div id="reportInner"><p style="color:#999;text-align:center;padding:40px">Select a basin in the Map tab, then click <b>Generate Report</b>.</p></div>
+</div>
+<div style="position:fixed;bottom:20px;right:20px;z-index:999">
+<button onclick="generateReport()" style="width:auto;padding:10px 20px;font-size:14px">📄 Generate Report</button>
+<button onclick="window.print()" style="width:auto;padding:10px 20px;font-size:14px;margin-left:8px;background:linear-gradient(135deg,#80ed99,#3b82f6)">🖨 Print PDF</button>
+</div>
+</section>
+
+<style>
+@media print {body *{visibility:hidden}#reportContent,#reportContent *{visibility:visible}#reportContent{position:absolute;left:0;top:0;width:100%}button{display:none!important}}
+.report-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:11px}
+.report-table th,.report-table td{border:1px solid #ccc;padding:4px 6px;text-align:center}
+.report-table th{background:#eee;font-weight:700}.report-table tr:nth-child(even){background:#f9f9f9}
+.report-h1{font-size:20px;margin:0 0 4px;color:#1a3a5c}
+.report-h2{font-size:16px;margin:16px 0 8px;color:#2d6b3f;border-bottom:2px solid #2d6b3f;padding-bottom:4px}
+.report-h3{font-size:13px;margin:12px 0 6px;color:#555}
+.report-stat{display:inline-block;margin:4px 12px;font-size:13px}.report-stat b{color:#1a3a5c}
+</style>
 
 <script>
 var MONTHS=['2023-01','2023-02','2023-03','2023-04','2023-05','2023-06','2023-07','2023-08','2023-09','2023-10','2023-11','2023-12'];
@@ -180,6 +202,64 @@ document.getElementById('bIVT').textContent=Number(last.ivt_magnitude_kg_ms).toF
 document.getElementById('bIVTDir').textContent='Dir: '+Number(last.ivt_direction_deg).toFixed(0)+'°';
 Plotly.react('budgetChart',[{x:rows.map(function(d){return d.month}),y:rows.map(function(d){return -Number(d.sink_mm_day)}),type:'bar',marker:{color:rows.map(function(d){return -Number(d.sink_mm_day)>=0?'#80ed99':'#ff6b6b'})},name:'NBMI'}],{paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',font:{color:'#e7f0ff'},margin:{l:50,r:10,t:10,b:40},xaxis:{title:'Month'},yaxis:{title:'NBMI mm/d',zeroline:true,zerolinecolor:'#3a5a8c'}},{displayModeBar:false});
 }catch(e){document.getElementById('bNBMI').textContent='error'}
+}
+
+// Report generator
+function generateReport(){
+if(!S.selBasin){alert('Select a basin in the Map tab first');return}
+var feat=findBasinFeature(S.selBasin),name=feat?(feat.properties.display_name||('HB6_'+S.selBasin)):('HB6_'+S.selBasin);
+var area=feat?Number(feat.properties.SUB_AREA||0).toFixed(0):'?';
+var months=MONTHS,bud=S.budget||{},nbmiVals=[],precipVals=[],srcBasins={},totalSrc=0;
+// Compute monthly stats and source aggregation
+months.forEach(function(m){
+  var key=S.selBasin+':'+m,nbmi=bud[key]||0;nbmiVals.push(nbmi);
+  // Get trajectories for this month to count source basins
+  var fn='trajectories_'+m.replace('-','')+'.csv.gz';
+  // We'll load async - for now use budget data only
+});
+var meanNBMI=nbmiVals.reduce(function(s,v){return s+v},0)/12;
+var maxNBMI=Math.max.apply(null,nbmiVals),minNBMI=Math.min.apply(null,nbmiVals);
+var wetMonths=nbmiVals.filter(function(v){return v<0}).length;
+var dryMonths=nbmiVals.filter(function(v){return v>0}).length;
+
+// Build report HTML
+var h='<div class="report-h1">ORBITA Basin Report</div>';
+h+='<p style="color:#666;margin:0 0 12px">Generated '+new Date().toISOString().slice(0,10)+'</p>';
+h+='<div class="report-h2">Basin: '+name+' (HB6_'+S.selBasin+')</div>';
+h+='<p>Area: '+area+' km² | HydroBASINS Level 6</p>';
+
+// Stats
+h+='<div class="report-h2">Annual Statistics — 2023</div>';
+h+='<div><span class="report-stat"><b>Mean NBMI:</b> '+meanNBMI.toFixed(2)+' mm/d</span>';
+h+='<span class="report-stat"><b>Max NBMI:</b> '+maxNBMI.toFixed(2)+' mm/d</span>';
+h+='<span class="report-stat"><b>Min NBMI:</b> '+minNBMI.toFixed(2)+' mm/d</span></div>';
+h+='<div><span class="report-stat"><b>Net source months:</b> '+dryMonths+'/12</span>';
+h+='<span class="report-stat"><b>Net sink months:</b> '+wetMonths+'/12</span></div>';
+if(meanNBMI>0)h+='<p style="color:#2d6b3f">🟢 This basin is a net <b>moisture source</b> — it injects moisture into the atmosphere, sustaining flying rivers.</p>';
+else h+='<p style="color:#c44">🔴 This basin is a net <b>precipitation sink</b> — it receives more moisture than it exports.</p>';
+
+// Monthly table
+h+='<div class="report-h2">Monthly NBMI</div>';
+h+='<table class="report-table"><tr><th>Month</th><th>NBMI (mm/d)</th><th>Direction</th><th>Classification</th></tr>';
+months.forEach(function(m,i){var v=nbmiVals[i],cls=v>2?'Strong source':v>0?'Weak source':v>-2?'Weak sink':'Strong sink';h+='<tr><td>'+m+'</td><td style="color:'+(v>=0?'#2d6b3f':'#c44')+'">'+v.toFixed(2)+'</td><td>'+(v>=0?'→ out':'← in')+'</td><td>'+cls+'</td></tr>'});
+h+='</table>';
+
+// Interpretation
+h+='<div class="report-h2">Interpretation</div>';
+var wetMonthsList=months.filter(function(m,i){return nbmiVals[i]<0});
+var dryMonthsList=months.filter(function(m,i){return nbmiVals[i]>0});
+h+='<p><b>Wet months (net sink):</b> '+(wetMonthsList.length?wetMonthsList.join(', '):'none')+' — during these months the basin receives atmospheric moisture from surrounding regions.</p>';
+h+='<p><b>Dry months (net source):</b> '+(dryMonthsList.length?dryMonthsList.join(', '):'none')+' — during these months the basin exports moisture to the atmosphere.</p>';
+
+// Source regions note
+h+='<div class="report-h2">Source Regions</div>';
+h+='<p>Use the <b>Map tab</b> to load trajectories for individual months. The <b>Source basins</b> chart shows which upstream basins contribute moisture to this basin via Lagrangian trajectories, weighted by their NBMI.</p>';
+
+// Trend note
+h+='<div class="report-h3">Multi-year projection</div>';
+h+='<p style="font-size:12px;color:#666">With only 2023 data, year-over-year trends are not yet available. As the ERA5 archive expands (data available through 2026 on GCS), the report will include: % change in NBMI, trajectory path shifts per month, ENSO composite analysis, and projected changes for dry/wet season precipitation.</p>';
+
+document.getElementById('reportInner').innerHTML=h;
 }
 
 // Startup
